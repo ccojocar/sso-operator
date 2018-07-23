@@ -22,7 +22,7 @@ pipeline {
           dir ('/home/jenkins/go/src/github.com/ccojocar/sso-operator') {
             checkout scm
             container('go') {
-              sh "make linux"
+              sh "make all"
               sh 'export VERSION=$PREVIEW_VERSION && skaffold build -f skaffold.yaml'
 
 
@@ -63,7 +63,7 @@ pipeline {
             }
             dir ('/home/jenkins/go/src/github.com/ccojocar/sso-operator') {
               container('go') {
-                sh "make build"
+                sh "make all"
                 sh 'export VERSION=`cat VERSION` && skaffold build -f skaffold.yaml'
 
                 sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:\$(cat VERSION)"
