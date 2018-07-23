@@ -12,11 +12,15 @@ BUILDFLAGS := ''
 CGO_ENABLED = 0
 VENDOR_DIR=vendor
 
-
 all: bootstrap fmt lint sec test build
 
-bootstrap:
-	dep ensure 
+DEP := $(GOPATH)/bin/dep
+$(DEP):
+	go get -u github.com/golang/dep/cmd/dep
+
+bootstrap: $(DEP)
+	@echo "INSTSLLING DEPENDENCIES"
+	$(DEP) ensure 
 
 build:
 	CGO_ENABLED=$(CGO_ENABLED) $(GO) build -ldflags $(BUILDFLAGS) -o bin/$(NAME) $(MAIN_GO)
@@ -35,14 +39,12 @@ fmt:
 clean:
 	rm -rf build release $(VENDOR_DIR)
 
-.PHONY: release clean
-
 GOLINT := $(GOPATH)/bin/golint
 $(GOLINT):
-	go get github.com/golang/lint/golint
+	go get -u github.com/golang/lint/golint
 
 .PHONY: lint
-lint: 
+lint: $(GOLINT)
 	@echo "VETING"
 	go vet $(go list ./... | grep -v /vendor/)
 	@echo "LINTING"
@@ -50,11 +52,11 @@ lint:
 
 GOSEC := $(GOPATH)/bin/gosec
 $(GOSEC):
-	go get github.com/securego/gosec/cmd/gosec/...
+	go get -u github.com/securego/gosec/cmd/gosec/...
 
 .PHONY: sec
 sec: $(GOSEC)
-	@echo "SECURITY"
+	@echo "SECURITY SCANNING"
 	$(GOSEC) -fmt=csv ./...
 
 watch:
