@@ -45,7 +45,7 @@ $(GOLINT):
 
 .PHONY: lint
 lint: $(GOLINT)
-	@echo "VETING"
+	@echo "VETTING"
 	go vet $(go list ./... | grep -v /vendor/)
 	@echo "LINTING"
 	$(GOLINT) -set_exit_status $(shell go list ./... | grep -v vendor)
