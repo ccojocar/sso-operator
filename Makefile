@@ -12,9 +12,15 @@ BUILDFLAGS := ''
 CGO_ENABLED = 0
 VENDOR_DIR=vendor
 
-all: build
+all: bootstrap fmt lint sec test build
 
-check: fmt build test
+DEP := $(GOPATH)/bin/dep
+$(DEP):
+	go get -u github.com/golang/dep/cmd/dep
+
+bootstrap: $(DEP)
+	@echo "INSTSLLING DEPENDENCIES"
+	$(DEP) ensure 
 
 build:
 	CGO_ENABLED=$(CGO_ENABLED) $(GO) build -ldflags $(BUILDFLAGS) -o bin/$(NAME) $(MAIN_GO)
@@ -22,44 +28,36 @@ build:
 test: 
 	CGO_ENABLED=$(CGO_ENABLED) $(GO) test $(PACKAGE_DIRS) -test.v
 
-full: $(PKGS)
-
 install:
 	GOBIN=${GOPATH}/bin $(GO) install -ldflags $(BUILDFLAGS) $(MAIN_GO)
 
 fmt:
+	@echo "FORMATTING"
 	@FORMATTED=`$(GO) fmt $(PACKAGE_DIRS)`
 	@([[ ! -z "$(FORMATTED)" ]] && printf "Fixed unformatted files:\n$(FORMATTED)") || true
 
 clean:
-	rm -rf build release
-
-linux:
-	CGO_ENABLED=$(CGO_ENABLED) GOOS=linux GOARCH=amd64 $(GO) build -ldflags $(BUILDFLAGS) -o bin/$(NAME) $(MAIN_GO)
-
-.PHONY: release clean
-
-FGT := $(GOPATH)/bin/fgt
-$(FGT):
-	go get github.com/GeertJohan/fgt
+	rm -rf build release $(VENDOR_DIR)
 
 GOLINT := $(GOPATH)/bin/golint
 $(GOLINT):
-	go get github.com/golang/lint/golint
-
-$(PKGS): $(GOLINT) $(FGT)
-	@echo "LINTING"
-	@$(FGT) $(GOLINT) $(GOPATH)/src/$@/*.go
-	@echo "VETTING"
-	@go vet -v $@
-	@echo "TESTING"
-	@go test -v $@
+	go get -u github.com/golang/lint/golint
 
 .PHONY: lint
-lint: vendor | $(PKGS) $(GOLINT) # ❷
-	@cd $(BASE) && ret=0 && for pkg in $(PKGS); do \
-	    test -z "$$($(GOLINT) $$pkg | tee /dev/stderr)" || ret=1 ; \
-	done ; exit $$ret
+lint: $(GOLINT)
+	@echo "VETTING"
+	go vet $(go list ./... | grep -v /vendor/)
+	@echo "LINTING"
+	$(GOLINT) -set_exit_status $(shell go list ./... | grep -v vendor)
+
+GOSEC := $(GOPATH)/bin/gosec
+$(GOSEC):
+	go get -u github.com/securego/gosec/cmd/gosec/...
+
+.PHONY: sec
+sec: $(GOSEC)
+	@echo "SECURITY SCANNING"
+	$(GOSEC) -fmt=csv ./...
 
 watch:
 	reflex -r "\.go$" -R "vendor.*" make skaffold-run

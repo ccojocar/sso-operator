@@ -1,26 +1,30 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"net/http"
+	"context"
+	"os"
+	"runtime"
+
+	"github.com/jenkins-x/sso-operator/pkg/operator"
+	sdk "github.com/operator-framework/operator-sdk/pkg/sdk"
+	sdkVersion "github.com/operator-framework/operator-sdk/version"
+
+	"github.com/sirupsen/logrus"
 )
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	title := "Jenkins X golang http example"
+const operatorNamespace = "OPERATOR_NAMESPACE"
 
-	from := ""
-	if r.URL != nil {
-		from = r.URL.String()
-	}
-	if from != "/favicon.ico" {
-		log.Printf("title: %s\n", title)
-	}
-
-	fmt.Fprintf(w, "Hello from:  "+title+"\n")
+func printVersion(namespace string) {
+	logrus.Infof("Go Version: %s", runtime.Version())
+	logrus.Infof("Go OS/Arch: %s/%s", runtime.GOOS, runtime.GOARCH)
+	logrus.Infof("operator-sdk Version: %v", sdkVersion.Version)
+	logrus.Infof("operator namespace: %s", namespace)
 }
 
 func main() {
-	http.HandleFunc("/", handler)
-	http.ListenAndServe(":8080", nil)
+	ns := os.Getenv(operatorNamespace)
+	printVersion(ns)
+	sdk.Watch("jenkins.io/v1", "SSO", ns, 5)
+	sdk.Handle(operator.NewHandler())
+	sdk.Run(context.TODO())
 }
