@@ -3,11 +3,11 @@ dependencies:
 - alias: expose
   name: exposecontroller
   repository: https://chartmuseum.build.cd.jenkins-x.io
-  version: 2.3.56
+  version: 2.3.67
 - alias: cleanup
   name: exposecontroller
   repository: https://chartmuseum.build.cd.jenkins-x.io
-  version: 2.3.56
+  version: 2.3.67
 - alias: preview
   name: sso-operator
   repository: file://../sso-operator
