@@ -21,10 +21,9 @@ spec:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-          env:
-            - name: OPERATOR_NAMESPACE
-              value: {{ .Release.Namespace }}
-          imagePullPolicy: Always
+        env:
+          - name: OPERATOR_NAMESPACE
+            value: {{ .Release.Namespace }}
         ports:
         - containerPort: {{ .Values.service.internalPort }}
         livenessProbe:
