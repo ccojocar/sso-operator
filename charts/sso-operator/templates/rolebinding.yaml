@@ -8,7 +8,7 @@ subjects:
 - kind: ServiceAccount
   name: {{ template "fullname" . }}
 roleRef:
-  kind: ClusterRole
+  kind: Role
   name: {{ template "fullname" . }}
   apiGroup: rbac.authorization.k8s.io
 
