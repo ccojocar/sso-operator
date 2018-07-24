@@ -24,7 +24,7 @@ func printVersion(namespace string) {
 func main() {
 	ns := os.Getenv(operatorNamespace)
 	printVersion(ns)
-	sdk.Watch("jenkins.io/v1", "SSO", ns, 5)
+	sdk.Watch("sso.jenkins.io/v1", "SSO", ns, 5)
 	sdk.Handle(operator.NewHandler())
 	sdk.Run(context.TODO())
 }
