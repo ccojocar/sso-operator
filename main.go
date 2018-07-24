@@ -26,7 +26,10 @@ func handleHealth() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		logrus.Debug("ping")
 	})
-	http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":8080", nil)
+	if err != nil {
+		logrus.Errorf("failed to start health probe: %v\n", err)
+	}
 }
 
 func main() {
