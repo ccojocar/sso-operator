@@ -39,3 +39,12 @@ type SSOSpec struct {
 type SSOStatus struct {
 	Status string `json:"status,omitempty" protobuf:"bytes,2,opt,name=status"`
 }
+
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+// SSOList represents a list of Single Sign-On Kubernetes objects
+type SSOList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata"`
+	Items           []SSO `json:"items"`
+}

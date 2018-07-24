@@ -8,3 +8,4 @@ target
 work
 bin/
 vendor
+sso-operator

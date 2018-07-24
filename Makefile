@@ -19,7 +19,7 @@ $(DEP):
 	go get -u github.com/golang/dep/cmd/dep
 
 bootstrap: $(DEP)
-	@echo "INSTSLLING DEPENDENCIES"
+	@echo "INSTALLING DEPENDENCIES"
 	$(DEP) ensure 
 
 build:
@@ -58,6 +58,10 @@ $(GOSEC):
 sec: $(GOSEC)
 	@echo "SECURITY SCANNING"
 	$(GOSEC) -fmt=csv ./...
+
+codegen:
+	@echo "GENERATING KUBERNETES CRDs"
+	hack/update-codegen.sh
 
 watch:
 	reflex -r "\.go$" -R "vendor.*" make skaffold-run

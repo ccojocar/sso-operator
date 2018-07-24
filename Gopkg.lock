@@ -494,11 +494,12 @@
   version = "kubernetes-1.9.3"
 
 [[projects]]
-  digest = "1:2b8cb0829b7ff281a487d8584ab7f75120295ff75d7a1089f8ff4f0e793bea4e"
+  digest = "1:4d279e9c46843b9e92f4a7fa96c608840e65b5cbb2834320aebd5d09eae88278"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
     "discovery/cached",
+    "discovery/fake",
     "dynamic",
     "kubernetes",
     "kubernetes/scheme",
@@ -533,6 +534,7 @@
     "pkg/version",
     "rest",
     "rest/watch",
+    "testing",
     "tools/auth",
     "tools/cache",
     "tools/clientcmd",
@@ -574,10 +576,13 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ee1d88b72ef4d3e6650f9ce488b37587e226f6aa840b54d940d0aff35e6a893f"
+  digest = "1:4a47321a311279d3031b017167e06b531e213a6e5b93df2a4250fb271c61bbab"
   name = "k8s.io/gengo"
   packages = [
     "args",
+    "examples/deepcopy-gen/generators",
+    "examples/defaulter-gen/generators",
+    "examples/set-gen/sets",
     "generator",
     "namer",
     "parser",
@@ -601,8 +606,23 @@
     "github.com/operator-framework/operator-sdk/pkg/sdk",
     "github.com/operator-framework/operator-sdk/version",
     "github.com/sirupsen/logrus",
+    "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
+    "k8s.io/apimachinery/pkg/labels",
+    "k8s.io/apimachinery/pkg/runtime",
+    "k8s.io/apimachinery/pkg/runtime/schema",
+    "k8s.io/apimachinery/pkg/runtime/serializer",
+    "k8s.io/apimachinery/pkg/types",
+    "k8s.io/apimachinery/pkg/watch",
+    "k8s.io/client-go/discovery",
+    "k8s.io/client-go/discovery/fake",
+    "k8s.io/client-go/rest",
+    "k8s.io/client-go/testing",
+    "k8s.io/client-go/tools/cache",
+    "k8s.io/client-go/util/flowcontrol",
     "k8s.io/code-generator/cmd/client-gen",
+    "k8s.io/gengo/examples/deepcopy-gen/generators",
+    "k8s.io/gengo/examples/defaulter-gen/generators",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
