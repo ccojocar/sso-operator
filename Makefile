@@ -19,7 +19,7 @@ $(DEP):
 	go get -u github.com/golang/dep/cmd/dep
 
 bootstrap: $(DEP)
-	@echo "INSTSLLING DEPENDENCIES"
+	@echo "INSTALLING DEPENDENCIES"
 	$(DEP) ensure 
 
 build:
