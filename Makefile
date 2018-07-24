@@ -59,6 +59,10 @@ sec: $(GOSEC)
 	@echo "SECURITY SCANNING"
 	$(GOSEC) -fmt=csv ./...
 
+codegen:
+	@echo "GENERATING KUBERNETES CRDs"
+	hack/update-codegen.sh
+
 watch:
 	reflex -r "\.go$" -R "vendor.*" make skaffold-run
 
