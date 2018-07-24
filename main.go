@@ -14,6 +14,7 @@ import (
 )
 
 const operatorNamespace = "OPERATOR_NAMESPACE"
+const port = "8080"
 
 func printVersion(namespace string) {
 	logrus.Infof("Go Version: %s", runtime.Version())
@@ -22,11 +23,12 @@ func printVersion(namespace string) {
 	logrus.Infof("operator namespace: %s", namespace)
 }
 
-func handleHealth() {
+func handleLiveness() {
+	logrus.Infof("Liveness probe listening on: %s", port)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		logrus.Debug("ping")
 	})
-	err := http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		logrus.Errorf("failed to start health probe: %v\n", err)
 	}
@@ -41,7 +43,7 @@ func main() {
 	sdk.Handle(operator.NewHandler())
 
 	// start the health probe
-	go handleHealth()
+	go handleLiveness()
 
 	// start the operator
 	sdk.Run(context.TODO())
