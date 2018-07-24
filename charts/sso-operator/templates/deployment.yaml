@@ -17,10 +17,14 @@ spec:
 {{ toYaml .Values.podAnnotations | indent 8 }}
 {{- end }}
     spec:
+      serviceAccountName: {{ template "fullname" . }}
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+          - name: OPERATOR_NAMESPACE
+            value: {{ .Release.Namespace }}
         ports:
         - containerPort: {{ .Values.service.internalPort }}
         livenessProbe:
