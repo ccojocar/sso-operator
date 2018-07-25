@@ -33,6 +33,9 @@ pipeline {
             container('go') {
               sh "make preview"
               sh "jx preview --app $APP_NAME --dir ../.."
+
+              // verify if the preview was properly deployed 
+              sh 'jx step verify --pods=1 --after=60 --restarts=0'
             }
           }
         }
@@ -86,6 +89,9 @@ pipeline {
 
               // promote through all 'Auto' promotion Environments
               sh 'jx promote -b --all-auto --timeout 1h --version \$(cat ../../VERSION)'
+
+              // verify if the application was properly promoted
+              sh 'jx step verify --pods=1 --after=60 --restarts=0'
             }
           }
         }
