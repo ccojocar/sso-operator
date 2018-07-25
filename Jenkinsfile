@@ -33,7 +33,7 @@ pipeline {
             container('go') {
               sh "make preview"
               sh "jx preview --app $APP_NAME --dir ../.."
-              sh "jx step verify --after=90"
+              sh "jx step verify"
             }
           }
         }
