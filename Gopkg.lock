@@ -26,6 +26,14 @@
   revision = "3a771d992973f24aa725d07868b467d1ddfceafb"
 
 [[projects]]
+  digest = "1:80a97451caa47c9dbd2328e791ec8b33f64a31c9717d9d75c0e3314edae1d018"
+  name = "github.com/coreos/dex"
+  packages = ["api"]
+  pruneopts = "NUT"
+  revision = "218d671a96865df2a4cf7f310efb99b8bfc5a5e2"
+  version = "v2.10.0"
+
+[[projects]]
   digest = "1:a2c1d0e43bd3baaa071d1b9ed72c27d78169b2b269f71c105ac4ba34b1be4a39"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -184,6 +192,14 @@
   version = "v0.3.5"
 
 [[projects]]
+  digest = "1:406338ad39ab2e37b7f4452906442a3dbf0eb3379dd1f06aafb5c07e769a5fbb"
+  name = "github.com/inconshreveable/mousetrap"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
+  version = "v1.0"
+
+[[projects]]
   digest = "1:0243cffa4a3410f161ee613dfdd903a636d07e838a42d341da95d81f42cd1d41"
   name = "github.com/json-iterator/go"
   packages = ["."]
@@ -265,6 +281,14 @@
   version = "v2.0.1"
 
 [[projects]]
+  digest = "1:5cf3f025cbee5951a4ee961de067c8a89fc95a5adabead774f82822efabab121"
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
+
+[[projects]]
   digest = "1:43b2d599cf31e3998d0ecac54fc45c0c0c2a2c363b62aaad9b664f01b3a84ac7"
   name = "github.com/prometheus/client_golang"
   packages = [
@@ -317,6 +341,14 @@
   version = "v1.0.6"
 
 [[projects]]
+  digest = "1:2c3b60fc961b7ddca4336bb7bb39146cb73ea2ad73d4afc6b4ffea05571e712a"
+  name = "github.com/spf13/cobra"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "ef82de70bb3f60c65fb8eebacbb2d122ef517385"
+  version = "v0.0.3"
+
+[[projects]]
   digest = "1:15e5c398fbd9d2c439b635a08ac161b13d04f0c2aa587fe256b65dc0c3efe8b7"
   name = "github.com/spf13/pflag"
   packages = ["."]
@@ -334,7 +366,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:d33361a6af4178e9ae5f4c00acc605530d132d720991f118673680bf4765f656"
+  digest = "1:aff6bfa566fe11b7745f2251e41796b40f4734e163fc683098792cdf848673cf"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -342,6 +374,8 @@
     "http2",
     "http2/hpack",
     "idna",
+    "internal/timeseries",
+    "trace",
   ]
   pruneopts = "NUT"
   revision = "a680a1efc54dd51c040b3b5ce4939ea3cf2ea0d1"
@@ -392,6 +426,48 @@
   ]
   pruneopts = "NUT"
   revision = "60ffea201e66e0d9375dc5bec85245d7b416710f"
+
+[[projects]]
+  branch = "master"
+  digest = "1:601e63e7d4577f907118bec825902505291918859d223bce015539e79f1160e3"
+  name = "google.golang.org/genproto"
+  packages = ["googleapis/rpc/status"]
+  pruneopts = "NUT"
+  revision = "02b4e95473316948020af0b7a4f0f22c73929b0e"
+
+[[projects]]
+  digest = "1:f778941d5c2e46da5e0f5d553d3e80bf70eb40d2e80bb4c649b625b9133f3d5f"
+  name = "google.golang.org/grpc"
+  packages = [
+    ".",
+    "balancer",
+    "balancer/base",
+    "balancer/roundrobin",
+    "codes",
+    "connectivity",
+    "credentials",
+    "encoding",
+    "encoding/proto",
+    "grpclog",
+    "internal",
+    "internal/backoff",
+    "internal/channelz",
+    "internal/grpcrand",
+    "keepalive",
+    "metadata",
+    "naming",
+    "peer",
+    "resolver",
+    "resolver/dns",
+    "resolver/passthrough",
+    "stats",
+    "status",
+    "tap",
+    "transport",
+  ]
+  pruneopts = "NUT"
+  revision = "168a6198bcb0ef175f7dacec0b8691fc141dc9b8"
+  version = "v1.13.0"
 
 [[projects]]
   digest = "1:2d1fbdc6777e5408cabeb02bf336305e724b925ff4546ded0fa8715a7267922a"
@@ -603,9 +679,14 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/coreos/dex/api",
     "github.com/operator-framework/operator-sdk/pkg/sdk",
     "github.com/operator-framework/operator-sdk/version",
+    "github.com/pkg/errors",
     "github.com/sirupsen/logrus",
+    "github.com/spf13/cobra",
+    "google.golang.org/grpc",
+    "google.golang.org/grpc/credentials",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/labels",
