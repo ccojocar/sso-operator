@@ -68,6 +68,8 @@ func (o *OperatorOptions) Run() {
 		os.Exit(2)
 	}
 
+	logrus.Infof("Connected to Dex gRPC server: %s", o.DexGrpcHostAndPort)
+
 	// configure the operator
 	sdk.Watch("sso.jenkins.io/v1", "SSO", ns, 5)
 	sdk.Handle(operator.NewHandler(dexClient))

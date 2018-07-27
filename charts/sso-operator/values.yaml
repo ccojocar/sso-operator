@@ -32,3 +32,16 @@ readinessProbe:
   successThreshold: 1
   timeoutSeconds: 1
 terminationGracePeriodSeconds: 10
+
+dex:
+  grpcHostAndPort: dex:5000 
+  certs:
+    grpcCA: dex-grpc-ca
+    grpcClientTls: dex-grpc-client-tls
+    install:
+      create: true
+      image: gcr.io/google_containers/kubernetes-dashboard-init-amd64
+      imageTag: "v1.0.0"
+      imagePullPolicy: "IfNotPresent"
+      sourceNamespace: jx
+      activeDeadlineSeconds: 300
