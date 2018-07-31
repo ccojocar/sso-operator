@@ -9,6 +9,7 @@ import (
 	"runtime"
 
 	"github.com/jenkins-x/sso-operator/pkg/dex"
+	"github.com/jenkins-x/sso-operator/pkg/kubernetes"
 	"github.com/jenkins-x/sso-operator/pkg/operator"
 	sdk "github.com/operator-framework/operator-sdk/pkg/sdk"
 	sdkVersion "github.com/operator-framework/operator-sdk/version"
@@ -69,6 +70,18 @@ func (o *OperatorOptions) Run() {
 	}
 
 	logrus.Infof("Connected to Dex gRPC server: %s", o.DexGrpcHostAndPort)
+
+	// Register the CRDs
+	apiclient, err := kubernetes.GetAPIExtensionsClient()
+	if err != nil {
+		logrus.Errorf("failed to register the k8s API extensions client: %v", err)
+		os.Exit(2)
+	}
+	err = kubernetes.RegisterSSOCRD(apiclient)
+	if err != nil {
+		logrus.Errorf("failed to register the SSO CRD: %v", err)
+		os.Exit(2)
+	}
 
 	// configure the operator
 	sdk.Watch("jenkins.io/v1", "SSO", ns, 5)

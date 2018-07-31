@@ -525,6 +525,20 @@
   revision = "183f3326a9353bd6d41430fc80f96259331d029c"
 
 [[projects]]
+  branch = "release-1.11"
+  digest = "1:ff274359ff12fa85f71caf1f76164a70239498037129fce826f04819ee79318e"
+  name = "k8s.io/apiextensions-apiserver"
+  packages = [
+    "pkg/apis/apiextensions",
+    "pkg/apis/apiextensions/v1beta1",
+    "pkg/client/clientset/clientset",
+    "pkg/client/clientset/clientset/scheme",
+    "pkg/client/clientset/clientset/typed/apiextensions/v1beta1",
+  ]
+  pruneopts = "NUT"
+  revision = "bbc52469f98bf18f81d6010a32c3377726cbfd84"
+
+[[projects]]
   digest = "1:e34a525f80f723267668e0e39be84c2aac8938db3b1e1ce0fedefcdf8d929432"
   name = "k8s.io/apimachinery"
   packages = [
@@ -689,6 +703,8 @@
     "github.com/spf13/cobra",
     "google.golang.org/grpc",
     "google.golang.org/grpc/credentials",
+    "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1",
+    "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/labels",
@@ -699,9 +715,11 @@
     "k8s.io/apimachinery/pkg/watch",
     "k8s.io/client-go/discovery",
     "k8s.io/client-go/discovery/fake",
+    "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/testing",
     "k8s.io/client-go/tools/cache",
+    "k8s.io/client-go/tools/clientcmd",
     "k8s.io/client-go/util/flowcontrol",
     "k8s.io/code-generator/cmd/client-gen",
     "k8s.io/gengo/examples/deepcopy-gen/generators",
