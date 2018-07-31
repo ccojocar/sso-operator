@@ -1,4 +1,4 @@
-kind: Role
+kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ template "fullname" . }}
@@ -6,9 +6,15 @@ metadata:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
 rules:
 - apiGroups:
-  - sso.jenkins.io
+  - jenkins.io
   resources:
   - "*"
+  verbs:
+  - "*"
+- apiGroups:
+  - apiextensions.k8s.io
+  resources:
+  - customresourcedefinitions
   verbs:
   - "*"
 - apiGroups:

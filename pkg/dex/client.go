@@ -75,6 +75,29 @@ func (c *Client) CreateClient(ctx context.Context, redirectUris []string, truste
 	return res.Client, nil
 }
 
+// UpdateClient updates an already registered OIDC client
+func (c *Client) UpdateClient(ctx context.Context, clientID string, redirectUris []string,
+	trustedPeers []string, public bool, name string, logoURL string) error {
+	req := &api.UpdateClientReq{
+		Id:           clientID,
+		RedirectUris: redirectUris,
+		TrustedPeers: trustedPeers,
+		Public:       public,
+		Name:         name,
+		LogoUrl:      logoURL,
+	}
+
+	res, err := c.dex.UpdateClient(ctx, req)
+	if err != nil {
+		return errors.Wrapf(err, "failed to update the client with id '%s'", clientID)
+	}
+
+	if res.NotFound {
+		return fmt.Errorf("update did not find the client with id '%s'", clientID)
+	}
+	return nil
+}
+
 // DeleteClient deletes the client with given Id from Dex
 func (c *Client) DeleteClient(ctx context.Context, id string) error {
 	req := &api.DeleteClientReq{
@@ -85,7 +108,7 @@ func (c *Client) DeleteClient(ctx context.Context, id string) error {
 		return errors.Wrapf(err, "failed to delete the client with id '%s'", id)
 	}
 	if res.NotFound {
-		return fmt.Errorf("delete did not found the client with id '%s'", id)
+		return fmt.Errorf("delete did not find the client with id '%s'", id)
 	}
 	return nil
 }

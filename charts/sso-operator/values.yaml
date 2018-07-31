@@ -43,5 +43,5 @@ dex:
       image: gcr.io/google_containers/kubernetes-dashboard-init-amd64
       imageTag: "v1.0.0"
       imagePullPolicy: "IfNotPresent"
-      sourceNamespace: jx
+      sourceNamespace: jx-staging
       activeDeadlineSeconds: 300

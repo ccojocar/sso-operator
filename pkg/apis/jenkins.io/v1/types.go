@@ -23,16 +23,9 @@ type SSO struct {
 
 // SSOSpec is the specification of a Single Sing-On resource
 type SSOSpec struct {
-	ID string `json:"id,omitempty"`
-
-	SecretName   string   `json:"secret,omitempty"`
-	RedirectURIs []string `json:"redirectURIs,omitempty"`
-	TrustedPeers []string `json:"trustedPeers,omitempty"`
-
-	Public bool `json:"public"`
-
-	Name    string `json:"name,omitempty"`
-	LogoURL string `json:"logoURL,omitempty"`
+	Name            string `json:"name,omitempty"`
+	DexURL          string `json:"dex_url,omitempty""`
+	UpstreamService string `json:"upstream_service,omitempty""`
 }
 
 // SSOStatus is the status of an Single Sign-On resource
