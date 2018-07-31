@@ -6,7 +6,7 @@ metadata:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
 rules:
 - apiGroups:
-  - sso.jenkins.io
+  - jenkins.io
   resources:
   - "*"
   verbs:
