@@ -76,10 +76,10 @@ func (c *Client) CreateClient(ctx context.Context, redirectUris []string, truste
 }
 
 // UpdateClient updates an already registered OIDC client
-func (c *Client) UpdateClient(ctx context.Context, clientId string, redirectUris []string,
+func (c *Client) UpdateClient(ctx context.Context, clientID string, redirectUris []string,
 	trustedPeers []string, public bool, name string, logoURL string) error {
 	req := &api.UpdateClientReq{
-		Id:           clientId,
+		Id:           clientID,
 		RedirectUris: redirectUris,
 		TrustedPeers: trustedPeers,
 		Public:       public,
@@ -89,11 +89,11 @@ func (c *Client) UpdateClient(ctx context.Context, clientId string, redirectUris
 
 	res, err := c.dex.UpdateClient(ctx, req)
 	if err != nil {
-		return errors.Wrapf(err, "failed to update the client with id '%s'", clientId)
+		return errors.Wrapf(err, "failed to update the client with id '%s'", clientID)
 	}
 
 	if res.NotFound {
-		return fmt.Errorf("update did not find the client with id '%s'", clientId)
+		return fmt.Errorf("update did not find the client with id '%s'", clientID)
 	}
 	return nil
 }
