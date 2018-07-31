@@ -71,7 +71,7 @@ func (o *OperatorOptions) Run() {
 	logrus.Infof("Connected to Dex gRPC server: %s", o.DexGrpcHostAndPort)
 
 	// configure the operator
-	sdk.Watch("sso.jenkins.io/v1", "SSO", ns, 5)
+	sdk.Watch("jenkins.io/v1", "SSO", ns, 5)
 	sdk.Handle(operator.NewHandler(dexClient))
 
 	// start the health probe
