@@ -32,6 +32,11 @@ required = [
   name = "github.com/operator-framework/operator-sdk"
   branch = "master"
 
+[[constraint]]
+  name = "github.com/coreos/dex"
+  source = "https://github.com/jenkins-x/dex.git" 
+  branch = "master"
+
 [prune]
   go-tests = true
   unused-packages = true
