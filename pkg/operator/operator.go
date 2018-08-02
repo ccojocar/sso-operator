@@ -32,17 +32,27 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 			return nil
 		}
 
-		sso := o
+		sso := o.DeepCopy()
+
+		// SSO was initialized already
+		if sso.Status.Initialized {
+			return nil
+		}
 
 		redirectUris := []string{fmt.Sprintf("http://%s/callback", sso.Name)}
 		publicClient := true
 		client, err := h.dexClient.CreateClient(ctx, redirectUris, []string{}, publicClient, sso.Name, "")
 		if err != nil {
-			return errors.Wrapf(err, "failed to create the OIDC client in dex for SSO CR with name '%s'", sso.Name)
+			return errors.Wrapf(err, "creating the OIDC client '%s' in dex", sso.Name)
 		}
 
 		logrus.Infof("Client created: %v", client)
 
+		sso.Status.Initialized = true
+		err = sdk.Update(sso)
+		if err != nil {
+			return errors.Wrap(err, "updating SSO CRD")
+		}
 	}
 	return nil
 }

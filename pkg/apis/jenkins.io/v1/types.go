@@ -23,13 +23,16 @@ type SSO struct {
 
 // SSOSpec is the specification of a Single Sing-On resource
 type SSOSpec struct {
-	DexURL          string `json:"dex_url,omitempty""`
+	// DexURL URL of dex IdP
+	DexURL string `json:"dex_url,omitempty""`
+	// Name of the upstream service for which the SSO is created
 	UpstreamService string `json:"upstream_service,omitempty""`
 }
 
 // SSOStatus is the status of an Single Sign-On resource
 type SSOStatus struct {
-	Status string `json:"status,omitempty" protobuf:"bytes,2,opt,name=status"`
+	// Initialized indicated if the SSO was configured in dex and oauth2_proxy
+	Initialized bool `json:"initialized,omitempty" protobuf:"bytes,2,opt,name=initialized"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
