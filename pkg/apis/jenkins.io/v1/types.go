@@ -23,7 +23,6 @@ type SSO struct {
 
 // SSOSpec is the specification of a Single Sing-On resource
 type SSOSpec struct {
-	Name            string `json:"name,omitempty"`
 	DexURL          string `json:"dex_url,omitempty""`
 	UpstreamService string `json:"upstream_service,omitempty""`
 }
