@@ -39,7 +39,7 @@ dex:
     grpcCA: dex-grpc-ca
     grpcClientTls: dex-grpc-client-tls
     install:
-      create: true
+      create: false
       image: gcr.io/google_containers/kubernetes-dashboard-init-amd64
       imageTag: "v1.0.0"
       imagePullPolicy: "IfNotPresent"
