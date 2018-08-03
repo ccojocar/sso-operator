@@ -39,12 +39,12 @@ const proxyConfigTemplate = `
 # OAuth2 Proxy Config File
 
 ## <addr>:<port> to listen on for HTTP/HTTPS clients
-http-address = ":{{.Port}}"
+http_address = ":{{.Port}}"
 
 ## the OAuth URLs.
-redirect-url = "{{.RedirectURL}}"
-login-url = "{{.LoginURL}}"
-redeem-url = "{{.RedeemURL}}"
+redirect_url = "{{.RedirectURL}}"
+login_url = "{{.LoginURL}}"
+redeem_url = "{{.RedeemURL}}"
 
 ## the http url(s) of the upstream endpoint. If multiple, routing is based on path
 upstreams = [
@@ -52,15 +52,20 @@ upstreams = [
 ]
 
 ## Log requests to stdout
-request-logging = true
+request_logging = true
 
 ## The OAuth Client ID, Secret
-client-id = "{{.ClientID}}"
-client-secret = "{{.ClientSecret}}"
+client_id = "{{.ClientID}}"
+client_secret = "{{.ClientSecret}}"
 
 ## Pass OAuth Access token to upstream via "X-Forwarded-Access-Token"
-pass-basic-auth = false
-pass-host-header = false
+pass_basic_auth = false
+pass_host_header = false
+
+## Email Domains to allow authentication for (this authorizes any email on this domain)
+email_domains = [
+     "*"
+ ]
 
 ## Cookie Settings
 ## Name     - the cookie name
@@ -75,19 +80,19 @@ pass-host-header = false
 ##            (ie: 1h means tokens are refreshed on request 1hr+ after it was set)
 ## Secure   - secure cookies are only sent by the browser of a HTTPS connection (recommended)
 ## HttpOnly - httponly cookies are not readable by javascript (recommended)
-cookie-name = "{{.Cookie.Name}}"
-cookie-secret = "{{.Cookie.Secret}}"
-cookie-domain = "{{.Cookie.Domain}}"
-cookie-expire = "{{.Cookie.Expire}}"
-cookie-refresh = "{{.Cookie.Refresh}}"
-cookie-secure = {{.Cookie.Secure}}
-cookie-httponly = {{.Cookie.HTTPOnly}}
+cookie_name = "{{.Cookie.Name}}"
+cookie_secret = "{{.Cookie.Secret}}"
+cookie_domain = "{{.Cookie.Domain}}"
+cookie_expire = "{{.Cookie.Expire}}"
+cookie_refresh = "{{.Cookie.Refresh}}"
+cookie_secure = {{.Cookie.Secure}}
+cookie_httponly = {{.Cookie.HTTPOnly}}
 
 ## Provider Specific Configurations
 provider = "oidc"
-oidc-issuer-url = "{{.OIDCIssuerURL}}"
+oidc_issuer_url = "{{.OIDCIssuerURL}}"
 scope = "openid email profile"
-skip-provider-button = true
+skip_provider_button = true
 `
 
 func renderConfig(config *Config) (string, error) {
