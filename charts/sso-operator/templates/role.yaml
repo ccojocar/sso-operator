@@ -26,13 +26,11 @@ rules:
   - list
   - watch
   - patch
-  - create
-  - update
-  - delete
 - apiGroups:
   - ""
   resources:
   - configmaps
+  - secrets
   - services
   verbs:
   - get
@@ -40,6 +38,9 @@ rules:
   - watch
   - patch
   - update
+  - create
+  - update
+  - delete
 - apiGroups:
   - apps
   resources:
@@ -49,18 +50,6 @@ rules:
   - list
   - watch
   - patch
-  - update
-- apiGroups:
-  - ""
-  - "route.openshift.io"
-  resources:
-  - routes
-  verbs:
-  - get
-  - list
-  - watch
-  - patch
   - create
   - update
   - delete
-
