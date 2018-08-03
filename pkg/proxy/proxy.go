@@ -19,9 +19,9 @@ import (
 
 const (
 	configPath       = "/config/oauth2_proxy.cfg"
-	configVolumeName = "oauth2-proxy-config"
-	configSecretName = "oauth2-proxy-secret" // #nosec
-	portName         = "oauth2-proxy-port"
+	configVolumeName = "proxy-config"
+	configSecretName = "proxy-secret" // #nosec
+	portName         = "proxy-port"
 	port             = 4180
 	healthPath       = "/ping"
 	replicas         = 1
