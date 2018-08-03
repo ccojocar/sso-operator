@@ -40,6 +40,10 @@ func RedirectURL(URL string) string {
 	return fmt.Sprintf("%s/oauth2/callback", URL)
 }
 
+func buildName(name string, namespace string) string {
+	return fmt.Sprintf("%s-%s", namespace, name)
+}
+
 // Deploy deploys the oauth2 proxy
 func Deploy(sso *apiv1.SSO, oidcClient *api.Client) error {
 	labels := map[string]string{"app": sso.Spec.UpstreamService}
@@ -56,7 +60,7 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) error {
 
 	podTempl := v1.PodTemplateSpec{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      sso.GetName(),
+			Name:      buildName(sso.GetName(), sso.GetNamespace()),
 			Namespace: sso.GetNamespace(),
 			Labels:    labels,
 		},
@@ -80,7 +84,7 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) error {
 			APIVersion: "apps/v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      sso.GetName(),
+			Name:      buildName(sso.GetName(), sso.GetNamespace()),
 			Namespace: sso.GetNamespace(),
 			Labels:    labels,
 		},
