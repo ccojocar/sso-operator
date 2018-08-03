@@ -25,17 +25,17 @@ type SSO struct {
 // SSOSpec is the specification of a Single Sing-On resource
 type SSOSpec struct {
 	// DexURL URL of dex IdP
-	DexURL string `json:"dex_url,omitempty""`
+	DexURL string `json:"dexUrl,omitempty""`
 	// Name of the upstream service for which the SSO is created
-	UpstreamService string `json:"upstream_service,omitempty""`
+	UpstreamService string `json:"upstreamService,omitempty""`
 	// Docker image for oauth2_proxy
-	ProxyImage string `json:"proxy_image,omitempty"`
+	ProxyImage string `json:"proxyImage,omitempty"`
 	// Docker image tag for oauth2_proxy
-	ProxyImageTag string `json:"proxy_image_tag,omitempty""`
+	ProxyImageTag string `json:"proxyImageTag,omitempty""`
 	// Resource requirements for oauth2_proxy pod
-	ProxyResources v1.ResourceRequirements `json:"proxy_resources,omitempty"`
+	ProxyResources v1.ResourceRequirements `json:"proxyResources,omitempty"`
 	// CookieSpec cookie specifications
-	CookieSpec CookieSpec `json:"cookie_spec,omitempty"`
+	CookieSpec CookieSpec `json:"cookieSspec,omitempty"`
 }
 
 // CookieSpec is the specification of a cookie for a Single Sign-On resource
@@ -49,7 +49,7 @@ type CookieSpec struct {
 	// Cookie is only send over a HTTPS connection
 	Secure bool `json:"secure,omitempty"`
 	// Cookie is not readable from JavaScript
-	HTTPOnly bool `json:"http_only,omitempty"`
+	HTTPOnly bool `json:"httpOnly,omitempty"`
 }
 
 // SSOStatus is the status of an Single Sign-On resource
