@@ -24,8 +24,8 @@ type SSO struct {
 
 // SSOSpec is the specification of a Single Sing-On resource
 type SSOSpec struct {
-	// DexURL URL of dex IdP
-	DexURL string `json:"dexUrl,omitempty""`
+	// OIDCIssuerURL URL of dex IdP
+	OIDCIssuerURL string `json:"oidcIssuerUrl,omitempty""`
 	// Name of the upstream service for which the SSO is created
 	UpstreamService string `json:"upstreamService,omitempty""`
 	// Docker image for oauth2_proxy
