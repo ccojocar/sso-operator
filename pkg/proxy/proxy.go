@@ -251,13 +251,25 @@ func proxySecret(sso *apiv1.SSO, client *api.Client, proxyURL string,
 	return secret, nil
 }
 
-func generateSecret(len int) (string, error) {
+func generateSecret(size int) (string, error) {
+	const letters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+	bytes, err := generateRandomBytes(size)
+	if err != nil {
+		return "", errors.Wrap(err, "generating secret")
+	}
+	for i, b := range bytes {
+		bytes[i] = letters[b%byte(len(letters))]
+	}
+	return string(bytes), nil
+}
+
+func generateRandomBytes(len int) ([]byte, error) {
 	b := make([]byte, len)
 	_, err := rand.Read(b)
 	if err != nil {
-		return "", errors.Wrap(err, "generating random")
+		return nil, errors.Wrap(err, "generating random")
 	}
-	return string(b), nil
+	return b, nil
 }
 
 func getUpstreamURL(upstreamService string, namespace string) (string, error) {
