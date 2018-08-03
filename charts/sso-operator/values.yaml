@@ -3,8 +3,8 @@
 # Declare variables to be passed into your templates.
 replicaCount: 1
 image:
-  repository: draft
-  tag: dev
+  repository: 10.15.242.213:5000/ccojocar/sso-operator
+  tag: 0.0.19
   pullPolicy: IfNotPresent
 service:
   name: sso-operator
