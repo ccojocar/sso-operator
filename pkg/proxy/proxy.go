@@ -50,7 +50,7 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) error {
 	}
 	secret.SetOwnerReferences(append(secret.GetOwnerReferences(), ownerRef(sso)))
 	err = sdk.Create(secret)
-	if err != nil {
+	if err != nil && !apierrors.IsAlreadyExists(err) {
 		return errors.Wrap(err, "creating oauth2_proxy secret")
 	}
 
