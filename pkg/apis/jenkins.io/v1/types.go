@@ -35,7 +35,7 @@ type SSOSpec struct {
 	// Resource requirements for oauth2_proxy pod
 	ProxyResources v1.ResourceRequirements `json:"proxyResources,omitempty"`
 	// CookieSpec cookie specifications
-	CookieSpec CookieSpec `json:"cookieSspec,omitempty"`
+	CookieSpec CookieSpec `json:"cookieSpec,omitempty"`
 }
 
 // CookieSpec is the specification of a cookie for a Single Sign-On resource
