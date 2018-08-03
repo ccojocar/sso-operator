@@ -43,7 +43,7 @@
   version = "v1.1.0"
 
 [[projects]]
-  digest = "1:feff0d85bf72d3f1c5955338bceb2533e33733c5c72e643c990db9f28abe5a61"
+  digest = "1:3537d33c077a9666720dc987fddfecb07270606ac0a58f67abd08e3b252c0a45"
   name = "github.com/emicklei/go-restful"
   packages = [
     ".",
@@ -94,7 +94,7 @@
   version = "0.15.0"
 
 [[projects]]
-  digest = "1:219b2e7d9a6cbe77079dddc3f26b77cbafaa2f23e5fc4eba4251d04f2a843202"
+  digest = "1:8679b8a64f3613e9749c5640c3535c83399b8e69f67ce54d91dc73f6d77373af"
   name = "github.com/gogo/protobuf"
   packages = [
     "proto",
@@ -113,7 +113,7 @@
   revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
 
 [[projects]]
-  digest = "1:713cc7628304d027a7e9edcb52da888a8912d6405250a8d9c8eff6f41dd54398"
+  digest = "1:03e14cff610a8a58b774e36bd337fa979482be86aab01be81fb8bbd6d0f07fc8"
   name = "github.com/golang/protobuf"
   packages = [
     "proto",
@@ -143,7 +143,7 @@
   revision = "24818f796faf91cd76ec7bddd72458fbced7a6c1"
 
 [[projects]]
-  digest = "1:add738701bd5b2b985c0c37011092c57218bdc46caf1e682a73dc210ad36b03f"
+  digest = "1:06a7dadb7b760767341ffb6c8d377238d68a1226f2b21b5d497d2e3f6ecf6b4e"
   name = "github.com/googleapis/gnostic"
   packages = [
     "OpenAPIv2",
@@ -156,7 +156,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a1db0214936912602a7a8cedc09a2e3211f5c097dc89189fb4b3bc86346c9e89"
+  digest = "1:7fdf3223c7372d1ced0b98bf53457c5e89d89aecbad9a77ba9fcc6e01f9e5621"
   name = "github.com/gregjones/httpcache"
   packages = [
     ".",
@@ -218,7 +218,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ebd709f6c64e850ee37ffd662604b647934ba1b7da39c7ba26381d634a4b6d4d"
+  digest = "1:84a5a2b67486d5d67060ac393aa255d05d24ed5ee41daecd5635ec22657b6492"
   name = "github.com/mailru/easyjson"
   packages = [
     "buffer",
@@ -254,7 +254,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:9649dd8012081818d4a00f85401cce0713b0946d88ded37837d9c18c651b63ea"
+  digest = "1:47ed69deebc12f31916848282703fde4ae5d027796849424c2c5b707920fe903"
   name = "github.com/operator-framework/operator-sdk"
   packages = [
     "pkg/k8sclient",
@@ -291,7 +291,15 @@
   version = "v0.8.0"
 
 [[projects]]
-  digest = "1:43b2d599cf31e3998d0ecac54fc45c0c0c2a2c363b62aaad9b664f01b3a84ac7"
+  digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  pruneopts = "NUT"
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
+  digest = "1:03bca087b180bf24c4f9060775f137775550a0834e18f0bca0520a868679dbd7"
   name = "github.com/prometheus/client_golang"
   packages = [
     "prometheus",
@@ -303,7 +311,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:0f37e09b3e92aaeda5991581311f8dbf38944b36a3edec61cc2d1991f527554a"
+  digest = "1:2d5cd61daa5565187e1d96bae64dbbc6080dacf741448e9629c64fd93203b0d4"
   name = "github.com/prometheus/client_model"
   packages = ["go"]
   pruneopts = "NUT"
@@ -311,7 +319,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:3bbebf77a04cda10bd07834d1686141608aca01c1aeb400d504d8aa026793b5a"
+  digest = "1:768b555b86742de2f28beb37f1dedce9a75f91f871d75b5717c96399c1a78c08"
   name = "github.com/prometheus/common"
   packages = [
     "expfmt",
@@ -323,7 +331,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:37e418257b05a9e9fabbf836df2d8f3613313e80a909da6b9597b759ebca61cd"
+  digest = "1:6621142cd60b7150ab66f38ff36303ca55843dc5a635c1f9a28f95ecddab72b4"
   name = "github.com/prometheus/procfs"
   packages = [
     ".",
@@ -343,7 +351,7 @@
   version = "v1.0.6"
 
 [[projects]]
-  digest = "1:2c3b60fc961b7ddca4336bb7bb39146cb73ea2ad73d4afc6b4ffea05571e712a"
+  digest = "1:343d44e06621142ab09ae0c76c1799104cdfddd3ffb445d78b1adf8dc3ffaf3d"
   name = "github.com/spf13/cobra"
   packages = ["."]
   pruneopts = "NUT"
@@ -359,6 +367,14 @@
   version = "v1.0.1"
 
 [[projects]]
+  digest = "1:bacb8b590716ab7c33f2277240972c9582d389593ee8d66fc10074e0508b8126"
+  name = "github.com/stretchr/testify"
+  packages = ["assert"]
+  pruneopts = "NUT"
+  revision = "f35b8ab0b5a2cef36673838d662e249dd9c94686"
+  version = "v1.2.2"
+
+[[projects]]
   branch = "master"
   digest = "1:3f3a05ae0b95893d90b9b3b5afdb79a9b3d96e4e36e099d841ae602e4aca0da8"
   name = "golang.org/x/crypto"
@@ -368,7 +384,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:aff6bfa566fe11b7745f2251e41796b40f4734e163fc683098792cdf848673cf"
+  digest = "1:d816c62dfe515b2cf7d0832d56ce48b3a98365ed53c8c636e220f5114f4b44d9"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -384,7 +400,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ce550ba55758c330b8152972202835a80cbd0122be793664808142e6166598cd"
+  digest = "1:43a352083eca9cd2a8e74419460d5767885501265cfca9c7204cc085aead1361"
   name = "golang.org/x/sys"
   packages = [
     "unix",
@@ -394,7 +410,7 @@
   revision = "bd9dbc187b6e1dacfdd2722a87e83093c2d7bd6e"
 
 [[projects]]
-  digest = "1:4e48d0d8df75f1bd0a0afe837599fc9ad96b59eecdd1900fc0dcceccaa5fdffc"
+  digest = "1:e33513a825fcd765e97b5de639a2f7547542d1a8245df0cef18e1fd390b778a9"
   name = "golang.org/x/text"
   packages = [
     "collate",
@@ -419,7 +435,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a464115f461c773a2b5ac42633ded88addc01fa36458345a7620959d839c578b"
+  digest = "1:e1c96c8c8ce0af57da9dccb008e540b3d13b55ea04b530fb4fceb81706082bdd"
   name = "golang.org/x/tools"
   packages = [
     "go/ast/astutil",
@@ -438,7 +454,7 @@
   revision = "2a72893556e4d1f6c795a4c039314c9fa751eedb"
 
 [[projects]]
-  digest = "1:f778941d5c2e46da5e0f5d553d3e80bf70eb40d2e80bb4c649b625b9133f3d5f"
+  digest = "1:d0e5846da58e4e20d1bbd7502b24f31d37e3ac1e02a9042d95bd93c2d0c139dd"
   name = "google.golang.org/grpc"
   packages = [
     ".",
@@ -489,7 +505,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ba5867dd81dbfc74229e3843dd1428447ae32e484aacf08acf3c00a6aea33ec4"
+  digest = "1:475337f0a8e5258b8e96a084eaffd16beecb23b109efddc53e05a2cb9d3be851"
   name = "k8s.io/api"
   packages = [
     "admissionregistration/v1alpha1",
@@ -526,7 +542,7 @@
 
 [[projects]]
   branch = "release-1.11"
-  digest = "1:ff274359ff12fa85f71caf1f76164a70239498037129fce826f04819ee79318e"
+  digest = "1:8d77a31bfcf24a6cb79214e408463706843ddb91ab9ed977e9d8bf4bae1aed36"
   name = "k8s.io/apiextensions-apiserver"
   packages = [
     "pkg/apis/apiextensions",
@@ -539,7 +555,7 @@
   revision = "bbc52469f98bf18f81d6010a32c3377726cbfd84"
 
 [[projects]]
-  digest = "1:e34a525f80f723267668e0e39be84c2aac8938db3b1e1ce0fedefcdf8d929432"
+  digest = "1:72f0391b61638378063a391098ae2fe0b9559f7c041be90ffd490126a424c50f"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -586,7 +602,7 @@
   version = "kubernetes-1.9.3"
 
 [[projects]]
-  digest = "1:4d279e9c46843b9e92f4a7fa96c608840e65b5cbb2834320aebd5d09eae88278"
+  digest = "1:00b0877df476aa97c886be8b361d49c928595f37ade6ca543bfda612f095bcbc"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -650,7 +666,7 @@
 
 [[projects]]
   branch = "release-1.11"
-  digest = "1:277094fe099ad3ae25f5b4f7b5d67a5495b73a17392715083ece6caef89d5fc0"
+  digest = "1:43ef9a37919f7a8948b7de4c05d20692f763adc40f15c9d330c544ae05d93947"
   name = "k8s.io/code-generator"
   packages = [
     "cmd/client-gen",
@@ -668,7 +684,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:4a47321a311279d3031b017167e06b531e213a6e5b93df2a4250fb271c61bbab"
+  digest = "1:fb0b799b5c7bd70d1cef3537e864457291f62e5a2e94ab659232e9958be5a869"
   name = "k8s.io/gengo"
   packages = [
     "args",
@@ -702,8 +718,11 @@
     "github.com/pkg/errors",
     "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",
+    "github.com/stretchr/testify/assert",
     "google.golang.org/grpc",
     "google.golang.org/grpc/credentials",
+    "k8s.io/api/apps/v1",
+    "k8s.io/api/core/v1",
     "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1",
     "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset",
     "k8s.io/apimachinery/pkg/api/errors",
@@ -713,6 +732,7 @@
     "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/apimachinery/pkg/runtime/serializer",
     "k8s.io/apimachinery/pkg/types",
+    "k8s.io/apimachinery/pkg/util/intstr",
     "k8s.io/apimachinery/pkg/watch",
     "k8s.io/client-go/discovery",
     "k8s.io/client-go/discovery/fake",

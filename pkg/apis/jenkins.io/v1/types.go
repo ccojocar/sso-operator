@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -27,6 +28,28 @@ type SSOSpec struct {
 	DexURL string `json:"dex_url,omitempty""`
 	// Name of the upstream service for which the SSO is created
 	UpstreamService string `json:"upstream_service,omitempty""`
+	// Docker image for oauth2_proxy
+	ProxyImage string `json:"proxy_image,omitempty"`
+	// Docker image tag for oauth2_proxy
+	ProxyImageTag string `json:"proxy_image_tag,omitempty""`
+	// Resource requirements for oauth2_proxy pod
+	ProxyResources v1.ResourceRequirements `json:"proxy_resources,omitempty"`
+	// CookieSpec cookie specifications
+	CookieSpec CookieSpec `json:"cookie_spec,omitempty"`
+}
+
+// CookieSpec is the specification of a cookie for a Single Sign-On resource
+type CookieSpec struct {
+	// Cookie name
+	Name string `json:"name,omitempty"`
+	// Expiration time of the cookie
+	Expire string `json:"expire,omitempty"`
+	// Refresh time of the cookie
+	Refresh string `json:"refresh,omitempt""`
+	// Cookie is only send over a HTTPS connection
+	Secure bool `json:"secure,omitempty"`
+	// Cookie is not readable from JavaScript
+	HTTPOnly bool `json:"http_only,omitempty"`
 }
 
 // SSOStatus is the status of an Single Sign-On resource

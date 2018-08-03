@@ -17,6 +17,9 @@ var (
 
 	// SchemeGroupVersion is group version used to register these objects
 	SchemeGroupVersion = schema.GroupVersion{Group: jenkinsio.GroupName, Version: jenkinsio.Version}
+
+	// SSOKind is the SSO CRD kind
+	SSOKind = "SSO"
 )
 
 func init() {
