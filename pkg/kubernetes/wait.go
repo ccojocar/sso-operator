@@ -62,6 +62,12 @@ func WaitForPodReady(pods corev1.PodInterface, podName string) error {
 		}
 		switch pod.Status.Phase {
 		case v1.PodRunning:
+			for _, cs := range pod.Status.ContainerStatuses {
+				if !cs.Ready {
+					logrus.Infof("container %s is still in state %s", cs.Name, cs.State.String())
+					return false, nil
+				}
+			}
 			return true, nil
 		case v1.PodSucceeded, v1.PodFailed:
 			return false, fmt.Errorf("pod already in terminal phase: %s", pod.Status.Phase)

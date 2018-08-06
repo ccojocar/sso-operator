@@ -170,6 +170,13 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "wait for service")
 	}
+
+	pods := k8sClient.CoreV1().Pods(ns)
+	err = kubernetes.WaitForPodReady(pods, sso.GetName())
+	if err != nil {
+		return nil, errors.Wrap(err, "waiting for SSO proxy POD to be ready")
+	}
+
 	return &Proxy{
 		Secret:     secret,
 		Deployment: d,
