@@ -24,20 +24,16 @@ rules:
   verbs:
   - get
   - list
-  - watch
-  - patch
 - apiGroups:
   - ""
   resources:
   - configmaps
   - secrets
   - services
+  - pods
   verbs:
   - get
   - list
-  - watch
-  - patch
-  - update
   - create
   - update
   - delete
@@ -48,8 +44,6 @@ rules:
   verbs:
   - get
   - list
-  - watch
-  - patch
   - create
   - update
   - delete
