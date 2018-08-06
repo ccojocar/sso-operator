@@ -172,32 +172,32 @@ func proxyContainer(sso *apiv1.SSO) v1.Container {
 			ReadOnly:  true,
 			MountPath: filepath.Dir(configPath),
 		}},
-		// LivenessProbe: &v1.Probe{
-		// Handler: v1.Handler{
-		// HTTPGet: &v1.HTTPGetAction{
-		// Path:   healthPath,
-		// Port:   intstr.FromInt(port),
-		// Scheme: v1.URISchemeHTTP,
-		// },
-		// },
-		// InitialDelaySeconds: 30,
-		// TimeoutSeconds:      10,
-		// PeriodSeconds:       60,
-		// FailureThreshold:    3,
-		// },
-		// ReadinessProbe: &v1.Probe{
-		// Handler: v1.Handler{
-		// HTTPGet: &v1.HTTPGetAction{
-		// Path:   healthPath,
-		// Port:   intstr.FromInt(port),
-		// Scheme: v1.URISchemeHTTP,
-		// },
-		// },
-		// InitialDelaySeconds: 10,
-		// TimeoutSeconds:      10,
-		// PeriodSeconds:       10,
-		// FailureThreshold:    3,
-		// },
+		LivenessProbe: &v1.Probe{
+			Handler: v1.Handler{
+				HTTPGet: &v1.HTTPGetAction{
+					Path:   healthPath,
+					Port:   intstr.FromInt(port),
+					Scheme: v1.URISchemeHTTP,
+				},
+			},
+			InitialDelaySeconds: 60,
+			TimeoutSeconds:      10,
+			PeriodSeconds:       60,
+			FailureThreshold:    3,
+		},
+		ReadinessProbe: &v1.Probe{
+			Handler: v1.Handler{
+				HTTPGet: &v1.HTTPGetAction{
+					Path:   healthPath,
+					Port:   intstr.FromInt(port),
+					Scheme: v1.URISchemeHTTP,
+				},
+			},
+			InitialDelaySeconds: 30,
+			TimeoutSeconds:      10,
+			PeriodSeconds:       10,
+			FailureThreshold:    3,
+		},
 	}
 }
 
