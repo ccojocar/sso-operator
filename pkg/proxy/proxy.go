@@ -121,16 +121,6 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
 		return nil, errors.Wrap(err, "creating oauth2_proxy deployment")
 	}
 
-	k8sClient, err := kubernetes.GetClientset()
-	if err != nil {
-		return nil, errors.Wrap(err, "getting k8s client")
-	}
-
-	err = kubernetes.WaitForDeploymentToStabilize(k8sClient, ns, deployment, createTimeout)
-	if err != nil {
-		return nil, errors.Wrap(err, "waiting for deployment")
-	}
-
 	annotations := map[string]string{
 		"fabric8.io/expose":              "true",
 		"fabric8.io/ingress.annotations": "kubernetes.io/ingress.class: nginx",
@@ -165,6 +155,11 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
 		return nil, errors.Wrap(err, "creating oauth2_proxy service")
 	}
 
+	k8sClient, err := kubernetes.GetClientset()
+	if err != nil {
+		return nil, errors.Wrap(err, "getting k8s client")
+	}
+
 	exists := true
 	err = kubernetes.WaitForService(k8sClient, ns, service, exists, time.Duration(10*time.Second), createTimeout)
 	if err != nil {
@@ -174,7 +169,7 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
 	pods := k8sClient.CoreV1().Pods(ns)
 	err = kubernetes.WaitForPodReady(pods, sso.GetName())
 	if err != nil {
-		return nil, errors.Wrap(err, "waiting for SSO proxy POD to be ready")
+		return nil, errors.Wrap(err, "waiting for SSO proxy")
 	}
 
 	return &Proxy{
