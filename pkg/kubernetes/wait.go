@@ -22,6 +22,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	appsv1 "k8s.io/api/apps/v1"
+	batchv1 "k8s.io/api/batch/v1"
 	"k8s.io/api/core/v1"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -213,4 +214,38 @@ func countEndpointsNum(e *v1.Endpoints) int {
 // IsRetryableAPIError indicates if the given error is retryable
 func IsRetryableAPIError(err error) bool {
 	return apierrs.IsTimeout(err) || apierrs.IsServerTimeout(err) || apierrs.IsTooManyRequests(err) || apierrs.IsInternalError(err)
+}
+
+// WaitForJobComplete wait for a job to complete
+func WaitForJobComplete(c kubernetes.Interface, namespace, name string, interval, timeout time.Duration) error {
+	err := wait.PollImmediate(interval, timeout, func() (bool, error) {
+		job, err := c.BatchV1().Jobs(namespace).Get(name, meta_v1.GetOptions{})
+		switch {
+		case err == nil:
+			conditions := job.Status.Conditions
+			if len(conditions) == 0 {
+				logrus.Infof("No condition found for job %s in namespace %s", name, namespace)
+				return false, nil
+			}
+			for _, condition := range conditions {
+				if condition.Type != batchv1.JobComplete {
+					return false, fmt.Errorf("job failed: %s", condition.Message)
+				}
+			}
+			return true, nil
+		case apierrs.IsNotFound(err):
+			logrus.Infof("job %s in namespace %s not found.", name, namespace)
+			return false, nil
+		case !IsRetryableAPIError(err):
+			logrus.Infof("Non-retryable failure while getting job.")
+			return false, err
+		default:
+			logrus.Infof("Get job %s in namespace %s failed: %v", name, namespace, err)
+			return false, nil
+		}
+	})
+	if err != nil {
+		return fmt.Errorf("error waiting for job %s/%s: %v", namespace, name, err)
+	}
+	return nil
 }
