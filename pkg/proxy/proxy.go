@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"path/filepath"
+	"time"
 
 	"github.com/coreos/dex/api"
 	apiv1 "github.com/jenkins-x/sso-operator/pkg/apis/jenkins.io/v1"
@@ -28,6 +29,7 @@ const (
 	publicPort       = 80
 	cookieSecretLen  = 32
 	fakeURL          = "http://fake-oauth2-proxy"
+	createTimeout    = time.Duration(60 * time.Second)
 )
 
 // FakeRedirectURL builds a fake redirect URL for oauth2 proxy
@@ -58,10 +60,12 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) error {
 		return errors.Wrap(err, "creating oauth2_proxy secret")
 	}
 
+	ns := sso.GetNamespace()
+
 	podTempl := v1.PodTemplateSpec{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      buildName(sso.GetName(), sso.GetNamespace()),
-			Namespace: sso.GetNamespace(),
+			Namespace: ns,
 			Labels:    labels,
 		},
 		Spec: v1.PodSpec{
@@ -77,6 +81,7 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) error {
 		},
 	}
 
+	deployment := buildName(sso.GetName(), sso.GetNamespace())
 	var replicas int32 = replicas
 	d := &appsv1.Deployment{
 		TypeMeta: metav1.TypeMeta{
@@ -84,8 +89,8 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) error {
 			APIVersion: "apps/v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      buildName(sso.GetName(), sso.GetNamespace()),
-			Namespace: sso.GetNamespace(),
+			Name:      deployment,
+			Namespace: ns,
 			Labels:    labels,
 		},
 		Spec: appsv1.DeploymentSpec{
@@ -109,18 +114,29 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) error {
 		return errors.Wrap(err, "creating oauth2_proxy deployment")
 	}
 
+	k8sClient, err := kubernetes.GetClientset()
+	if err != nil {
+		return errors.Wrap(err, "getting k8s client")
+	}
+
+	err = kubernetes.WaitForDeploymentToStabilize(k8sClient, ns, deployment, createTimeout)
+	if err != nil {
+		return errors.Wrap(err, "waiting for deployment")
+	}
+
 	annotations := map[string]string{
 		"fabric8.io/expose":              "true",
 		"fabric8.io/ingress.annotations": "kubernetes.io/ingress.class: nginx",
 	}
+	service := sso.GetName()
 	svc := &v1.Service{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Service",
 			APIVersion: "v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        sso.GetName(),
-			Namespace:   sso.GetNamespace(),
+			Name:        service,
+			Namespace:   ns,
 			Labels:      labels,
 			Annotations: annotations,
 		},
@@ -140,6 +156,12 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) error {
 	err = sdk.Create(svc)
 	if err != nil && apierrors.IsAlreadyExists(err) {
 		return errors.Wrap(err, "creating oauth2_proxy service")
+	}
+
+	exists := true
+	err = kubernetes.WaitForService(k8sClient, ns, service, exists, time.Duration(10*time.Second), createTimeout)
+	if err != nil {
+		return errors.Wrap(err, "wait for service")
 	}
 	return nil
 }
