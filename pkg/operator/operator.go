@@ -8,6 +8,7 @@ import (
 	"github.com/jenkins-x/sso-operator/pkg/proxy"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 // NewHandler returns a new SSO operator event handler
@@ -55,6 +56,8 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		if err != nil {
 			return errors.Wrap(err, "updating SSO CRD")
 		}
+
+		logrus.Infof("SSO proxy '%s' initialized", sso.GetName())
 	}
 	return nil
 }

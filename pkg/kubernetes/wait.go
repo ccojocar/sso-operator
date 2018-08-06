@@ -43,7 +43,7 @@ func WaitForPodReady(pods corev1.PodInterface, podName string) error {
 			IncludeUninitialized: true,
 		})
 		if err != nil {
-			logrus.Infof("Getting pod: %v", err)
+			logrus.Infof("Getting pod: %v.", err)
 			return false, nil
 		}
 		return true, nil
@@ -52,7 +52,7 @@ func WaitForPodReady(pods corev1.PodInterface, podName string) error {
 		return err
 	}
 
-	logrus.Infof("Waiting for %s to be ready", podName)
+	logrus.Infof("Waiting for %s to be ready.", podName)
 	return wait.PollImmediate(time.Second, time.Minute*10, func() (bool, error) {
 		pod, err := pods.Get(podName, meta_v1.GetOptions{
 			IncludeUninitialized: true,
@@ -64,7 +64,7 @@ func WaitForPodReady(pods corev1.PodInterface, podName string) error {
 		case v1.PodRunning:
 			for _, cs := range pod.Status.ContainerStatuses {
 				if !cs.Ready {
-					logrus.Infof("Container %s is still in state %s", cs.Name, cs.State.String())
+					logrus.Infof("Container %s is still in state %s.", cs.Name, cs.State.String())
 					return false, nil
 				}
 			}
@@ -86,7 +86,7 @@ func WaitForPodComplete(pods corev1.PodInterface, podName string, timeout time.D
 			IncludeUninitialized: true,
 		})
 		if err != nil {
-			logrus.Infof("Getting pod %s", err)
+			logrus.Infof("Getting pod %s.", err)
 			return false, nil
 		}
 		switch pod.Status.Phase {
@@ -119,19 +119,19 @@ func WaitForPodsWithLabelRunning(c kubernetes.Interface, namespace string, label
 		}
 
 		if lastKnownPodNumber != len(pods.Items) {
-			logrus.Infof("Found %d Pods for label selector %s\n", len(pods.Items), label.String())
+			logrus.Infof("Found %d Pods for label selector %s.\n", len(pods.Items), label.String())
 			lastKnownPodNumber = len(pods.Items)
 		}
 
 		for _, pod := range pods.Items {
 			phase := pod.Status.Phase
 			if phase != v1.PodRunning {
-				logrus.Infof("Pod %s still has state %s", pod.GetName(), phase)
+				logrus.Infof("Pod %s still in state %s.", pod.GetName(), phase)
 				return false, nil
 			}
 			for _, cs := range pod.Status.ContainerStatuses {
 				if !cs.Ready {
-					logrus.Infof("Container %s from %s pod is still not running", cs.Name, pod.GetName())
+					logrus.Infof("Pod %s still has container %s not running.", pod.GetName(), cs.Name)
 					return false, nil
 				}
 			}
@@ -164,7 +164,7 @@ func WaitForDeploymentToStabilize(c kubernetes.Interface, namespace, name string
 				logrus.Infof("Deployment %s in namespace %s ready.", name, namespace)
 				return true, nil
 			}
-			logrus.Infof("Waiting for deployment %s to stabilize, generation %v observed generation %v spec.replicas %d status.replicas %d",
+			logrus.Infof("Waiting for deployment %s to stabilize, generation %v observed generation %v spec.replicas %d status.replicas %d.",
 				name, dp.Generation, dp.Status.ObservedGeneration, *(dp.Spec.Replicas), dp.Status.Replicas)
 		}
 		return false, nil
@@ -187,7 +187,7 @@ func WaitForService(c kubernetes.Interface, namespace, name string, exist bool, 
 			logrus.Infof("Non-retryable failure while getting service.")
 			return false, err
 		default:
-			logrus.Infof("Get service %s in namespace %s failed: %v", name, namespace, err)
+			logrus.Infof("Get service %s in namespace %s failed: %v.", name, namespace, err)
 			return false, nil
 		}
 	})
@@ -201,7 +201,7 @@ func WaitForService(c kubernetes.Interface, namespace, name string, exist bool, 
 //WaitForServiceEndpointsNum waits until the amount of endpoints that implement service to expectNum.
 func WaitForServiceEndpointsNum(c kubernetes.Interface, namespace, serviceName string, expectNum int, interval, timeout time.Duration) error {
 	return wait.Poll(interval, timeout, func() (bool, error) {
-		logrus.Infof("Waiting for amount of service:%s endpoints to be %d", serviceName, expectNum)
+		logrus.Infof("Waiting for amount of service:%s endpoints to be %d.", serviceName, expectNum)
 		list, err := c.CoreV1().Endpoints(namespace).List(meta_v1.ListOptions{})
 		if err != nil {
 			return false, err
@@ -237,7 +237,7 @@ func WaitForJobComplete(c kubernetes.Interface, namespace, name string, interval
 		case err == nil:
 			conditions := job.Status.Conditions
 			if len(conditions) == 0 {
-				logrus.Infof("No condition found for job %s in namespace %s", name, namespace)
+				logrus.Infof("No condition found for job %s in namespace %s.", name, namespace)
 				return false, nil
 			}
 			for _, condition := range conditions {
@@ -253,7 +253,7 @@ func WaitForJobComplete(c kubernetes.Interface, namespace, name string, interval
 			logrus.Infof("Non-retryable failure while getting job.")
 			return false, err
 		default:
-			logrus.Infof("Get job %s in namespace %s failed: %v", name, namespace, err)
+			logrus.Infof("Get job %s in namespace %s failed: %v.", name, namespace, err)
 			return false, nil
 		}
 	})
