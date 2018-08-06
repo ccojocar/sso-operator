@@ -32,6 +32,13 @@ const (
 	createTimeout    = time.Duration(60 * time.Second)
 )
 
+// Proxy keeps the k8s resources created for a proxy
+type Proxy struct {
+	Secret     *v1.Secret
+	Deployment *appsv1.Deployment
+	Service    *v1.Service
+}
+
 // FakeRedirectURL builds a fake redirect URL for oauth2 proxy
 func FakeRedirectURL() string {
 	return RedirectURL(fakeURL)
@@ -47,17 +54,17 @@ func buildName(name string, namespace string) string {
 }
 
 // Deploy deploys the oauth2 proxy
-func Deploy(sso *apiv1.SSO, oidcClient *api.Client) error {
+func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
 	labels := map[string]string{"app": sso.Spec.UpstreamService}
 
 	secret, err := proxySecret(sso, oidcClient, fakeURL, labels)
 	if err != nil {
-		return errors.Wrap(err, "creating oauth2_proxy config")
+		return nil, errors.Wrap(err, "creating oauth2_proxy config")
 	}
 	secret.SetOwnerReferences(append(secret.GetOwnerReferences(), ownerRef(sso)))
 	err = sdk.Create(secret)
 	if err != nil && !apierrors.IsAlreadyExists(err) {
-		return errors.Wrap(err, "creating oauth2_proxy secret")
+		return nil, errors.Wrap(err, "creating oauth2_proxy secret")
 	}
 
 	ns := sso.GetNamespace()
@@ -111,17 +118,17 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) error {
 
 	err = sdk.Create(d)
 	if err != nil && !apierrors.IsAlreadyExists(err) {
-		return errors.Wrap(err, "creating oauth2_proxy deployment")
+		return nil, errors.Wrap(err, "creating oauth2_proxy deployment")
 	}
 
 	k8sClient, err := kubernetes.GetClientset()
 	if err != nil {
-		return errors.Wrap(err, "getting k8s client")
+		return nil, errors.Wrap(err, "getting k8s client")
 	}
 
 	err = kubernetes.WaitForDeploymentToStabilize(k8sClient, ns, deployment, createTimeout)
 	if err != nil {
-		return errors.Wrap(err, "waiting for deployment")
+		return nil, errors.Wrap(err, "waiting for deployment")
 	}
 
 	annotations := map[string]string{
@@ -155,15 +162,19 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) error {
 
 	err = sdk.Create(svc)
 	if err != nil && apierrors.IsAlreadyExists(err) {
-		return errors.Wrap(err, "creating oauth2_proxy service")
+		return nil, errors.Wrap(err, "creating oauth2_proxy service")
 	}
 
 	exists := true
 	err = kubernetes.WaitForService(k8sClient, ns, service, exists, time.Duration(10*time.Second), createTimeout)
 	if err != nil {
-		return errors.Wrap(err, "wait for service")
+		return nil, errors.Wrap(err, "wait for service")
 	}
-	return nil
+	return &Proxy{
+		Secret:     secret,
+		Deployment: d,
+		Service:    svc,
+	}, nil
 }
 
 func ownerRef(sso *apiv1.SSO) metav1.OwnerReference {

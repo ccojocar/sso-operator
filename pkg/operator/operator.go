@@ -45,7 +45,7 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 			return errors.Wrapf(err, "creating the OIDC client '%s' in dex", sso.Name)
 		}
 
-		err = proxy.Deploy(sso, client)
+		_, err = proxy.Deploy(sso, client)
 		if err != nil {
 			return errors.Wrap(err, "deploying SSO proxy")
 		}
