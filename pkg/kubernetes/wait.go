@@ -38,12 +38,12 @@ import (
 // WaitForPodReady waits for given POD to become ready
 func WaitForPodReady(pods corev1.PodInterface, podName string) error {
 	logrus.Infof("Waiting for %s to be scheduled", podName)
-	err := wait.PollImmediate(time.Millisecond*500, time.Second*10, func() (bool, error) {
+	err := wait.PollImmediate(time.Second, time.Minute*2, func() (bool, error) {
 		_, err := pods.Get(podName, meta_v1.GetOptions{
 			IncludeUninitialized: true,
 		})
 		if err != nil {
-			logrus.Infof("Getting pod %s", err)
+			logrus.Infof("Getting pod: %v", err)
 			return false, nil
 		}
 		return true, nil
@@ -53,7 +53,7 @@ func WaitForPodReady(pods corev1.PodInterface, podName string) error {
 	}
 
 	logrus.Infof("Waiting for %s to be ready", podName)
-	return wait.PollImmediate(time.Millisecond*500, time.Minute*10, func() (bool, error) {
+	return wait.PollImmediate(time.Second, time.Minute*10, func() (bool, error) {
 		pod, err := pods.Get(podName, meta_v1.GetOptions{
 			IncludeUninitialized: true,
 		})
@@ -64,7 +64,7 @@ func WaitForPodReady(pods corev1.PodInterface, podName string) error {
 		case v1.PodRunning:
 			for _, cs := range pod.Status.ContainerStatuses {
 				if !cs.Ready {
-					logrus.Infof("container %s is still in state %s", cs.Name, cs.State.String())
+					logrus.Infof("Container %s is still in state %s", cs.Name, cs.State.String())
 					return false, nil
 				}
 			}

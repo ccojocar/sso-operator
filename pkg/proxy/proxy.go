@@ -151,7 +151,7 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
 	svc.SetOwnerReferences(append(svc.GetOwnerReferences(), ownerRef(sso)))
 
 	err = sdk.Create(svc)
-	if err != nil && apierrors.IsAlreadyExists(err) {
+	if err != nil && !apierrors.IsAlreadyExists(err) {
 		return nil, errors.Wrap(err, "creating oauth2_proxy service")
 	}
 
