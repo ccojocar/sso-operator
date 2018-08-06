@@ -15,6 +15,7 @@ import (
 	"k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8slabels "k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
@@ -30,6 +31,7 @@ const (
 	cookieSecretLen  = 32
 	fakeURL          = "http://fake-oauth2-proxy"
 	createTimeout    = time.Duration(60 * time.Second)
+	readyTimeout     = time.Duration(5 * time.Minute)
 )
 
 // Proxy keeps the k8s resources created for a proxy
@@ -55,7 +57,7 @@ func buildName(name string, namespace string) string {
 
 // Deploy deploys the oauth2 proxy
 func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
-	labels := map[string]string{"app": sso.Spec.UpstreamService}
+	labels := map[string]string{"app": sso.Spec.UpstreamService, "sso": sso.GetName()}
 
 	secret, err := proxySecret(sso, oidcClient, fakeURL, labels)
 	if err != nil {
@@ -166,8 +168,8 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
 		return nil, errors.Wrap(err, "wait for service")
 	}
 
-	pods := k8sClient.CoreV1().Pods(ns)
-	err = kubernetes.WaitForPodReady(pods, sso.GetName())
+	label := k8slabels.SelectorFromSet(k8slabels.Set(map[string]string{"sso": sso.GetName()}))
+	err = kubernetes.WaitForPodsWithLabelRunning(k8sClient, ns, label, readyTimeout)
 	if err != nil {
 		return nil, errors.Wrap(err, "waiting for SSO proxy")
 	}

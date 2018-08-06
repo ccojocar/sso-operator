@@ -103,15 +103,18 @@ func WaitForPodComplete(pods corev1.PodInterface, podName string, timeout time.D
 	})
 }
 
-// WaitForPodsWithLabelRunning waits up to 10 minutes for all matching pods to become Running and at least one
-// matching pod exists.
-func WaitForPodsWithLabelRunning(c kubernetes.Interface, namespace string, label labels.Selector) error {
+// WaitForPodsWithLabelRunning waits for all matching pods to become Running and at least one matching pod exists.
+func WaitForPodsWithLabelRunning(c kubernetes.Interface, namespace string, label labels.Selector, timeout time.Duration) error {
 	lastKnownPodNumber := -1
-	return wait.PollImmediate(500*time.Millisecond, time.Minute*10, func() (bool, error) {
+	return wait.PollImmediate(time.Second, timeout, func() (bool, error) {
 		listOpts := meta_v1.ListOptions{LabelSelector: label.String()}
 		pods, err := c.CoreV1().Pods(namespace).List(listOpts)
 		if err != nil {
-			logrus.Infof("error getting Pods with label selector %q [%v]\n", label.String(), err)
+			logrus.Infof("Error getting Pods with label selector %q [%v]\n", label.String(), err)
+			return false, nil
+		}
+
+		if len(pods.Items) == 0 {
 			return false, nil
 		}
 
@@ -120,13 +123,17 @@ func WaitForPodsWithLabelRunning(c kubernetes.Interface, namespace string, label
 			lastKnownPodNumber = len(pods.Items)
 		}
 
-		if len(pods.Items) == 0 {
-			return false, nil
-		}
-
 		for _, pod := range pods.Items {
-			if pod.Status.Phase != v1.PodRunning {
+			phase := pod.Status.Phase
+			if phase != v1.PodRunning {
+				logrus.Infof("Pod %s still has state %s", pod.GetName(), phase)
 				return false, nil
+			}
+			for _, cs := range pod.Status.ContainerStatuses {
+				if !cs.Ready {
+					logrus.Infof("Container %s from %s pod is still in state %s", cs.Name, pod.GetName(), cs.State.String())
+					return false, nil
+				}
 			}
 		}
 
