@@ -131,7 +131,7 @@ func WaitForPodsWithLabelRunning(c kubernetes.Interface, namespace string, label
 			}
 			for _, cs := range pod.Status.ContainerStatuses {
 				if !cs.Ready {
-					logrus.Infof("Container %s from %s pod is still in state %s", cs.Name, pod.GetName(), cs.State.String())
+					logrus.Infof("Container %s from %s pod is still not running", cs.Name, pod.GetName())
 					return false, nil
 				}
 			}
