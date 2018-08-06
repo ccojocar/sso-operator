@@ -98,11 +98,11 @@ func WaitForPodComplete(pods corev1.PodInterface, podName string, timeout time.D
 
 // WaitForPodsWithLabelRunning waits up to 10 minutes for all matching pods to become Running and at least one
 // matching pod exists.
-func WaitForPodsWithLabelRunning(c kubernetes.Interface, ns string, label labels.Selector) error {
+func WaitForPodsWithLabelRunning(c kubernetes.Interface, namespace string, label labels.Selector) error {
 	lastKnownPodNumber := -1
 	return wait.PollImmediate(500*time.Millisecond, time.Minute*10, func() (bool, error) {
 		listOpts := meta_v1.ListOptions{LabelSelector: label.String()}
-		pods, err := c.CoreV1().Pods(ns).List(listOpts)
+		pods, err := c.CoreV1().Pods(namespace).List(listOpts)
 		if err != nil {
 			logrus.Infof("error getting Pods with label selector %q [%v]\n", label.String(), err)
 			return false, nil
@@ -128,12 +128,12 @@ func WaitForPodsWithLabelRunning(c kubernetes.Interface, ns string, label labels
 }
 
 // WaitForDeploymentToStabilize waits till the Deployment has a matching generation/replica count between spec and status.
-func WaitForDeploymentToStabilize(c kubernetes.Interface, ns, name string, timeout time.Duration) error {
+func WaitForDeploymentToStabilize(c kubernetes.Interface, namespace, name string, timeout time.Duration) error {
 	options := meta_v1.ListOptions{FieldSelector: fields.Set{
 		"metadata.name":      name,
-		"metadata.namespace": ns,
+		"metadata.namespace": namespace,
 	}.AsSelector().String()}
-	w, err := c.AppsV1().Deployments(ns).Watch(options)
+	w, err := c.AppsV1().Deployments(namespace).Watch(options)
 	if err != nil {
 		return err
 	}
@@ -144,9 +144,10 @@ func WaitForDeploymentToStabilize(c kubernetes.Interface, ns, name string, timeo
 		}
 		switch dp := event.Object.(type) {
 		case *appsv1.Deployment:
-			if dp.Name == name && dp.Namespace == ns &&
+			if dp.Name == name && dp.Namespace == namespace &&
 				dp.Generation <= dp.Status.ObservedGeneration &&
 				*(dp.Spec.Replicas) == dp.Status.Replicas {
+				logrus.Infof("Deployment %s in namespace %s ready.", name, namespace)
 				return true, nil
 			}
 			logrus.Infof("Waiting for deployment %s to stabilize, generation %v observed generation %v spec.replicas %d status.replicas %d",
