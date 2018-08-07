@@ -84,7 +84,6 @@ func exposeJob(sso *apiv1.SSO, serviceAccount string) *batchv1.Job {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      buildName(sso.GetName(), ns),
 			Namespace: ns,
-			Labels:    labels(sso),
 		},
 		Spec: v1.PodSpec{
 			ServiceAccountName: serviceAccount,
@@ -112,7 +111,6 @@ func exposeJob(sso *apiv1.SSO, serviceAccount string) *batchv1.Job {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      jobName,
 			Namespace: ns,
-			Labels:    labels(sso),
 		},
 		Spec: batchv1.JobSpec{
 			Template: podTempl,
@@ -162,7 +160,6 @@ func exposeConfigMap(sso *apiv1.SSO, serviceName string) (*v1.ConfigMap, error) 
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      exposeConfigMapName,
 			Namespace: sso.GetNamespace(),
-			Labels:    labels(sso),
 		},
 		Data: map[string]string{
 			filepath.Base(exposeConfigPath): config,
