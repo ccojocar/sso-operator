@@ -20,18 +20,19 @@ import (
 )
 
 const (
-	configPath       = "/config/oauth2_proxy.cfg"
-	configVolumeName = "proxy-config"
-	configSecretName = "proxy-secret" // #nosec
-	portName         = "proxy-port"
-	port             = 4180
-	healthPath       = "/ping"
-	replicas         = 1
-	publicPort       = 80
-	cookieSecretLen  = 32
-	fakeURL          = "http://fake-oauth2-proxy"
-	createTimeout    = time.Duration(60 * time.Second)
-	readyTimeout     = time.Duration(5 * time.Minute)
+	configPath          = "/config/oauth2_proxy.cfg"
+	configVolumeName    = "proxy-config"
+	configSecretName    = "proxy-secret" // #nosec
+	portName            = "proxy-port"
+	port                = 4180
+	healthPath          = "/ping"
+	replicas            = 1
+	publicPort          = 80
+	cookieSecretLen     = 32
+	fakeURL             = "http://fake-oauth2-proxy"
+	createTimeout       = time.Duration(60 * time.Second)
+	createIntervalCheck = time.Duration(10 * time.Second)
+	readyTimeout        = time.Duration(5 * time.Minute)
 )
 
 // Proxy keeps the k8s resources created for a proxy
@@ -55,11 +56,13 @@ func buildName(name string, namespace string) string {
 	return fmt.Sprintf("%s-%s", namespace, name)
 }
 
+func labels(sso *apiv1.SSO) map[string]string {
+	return map[string]string{"app": sso.Spec.UpstreamService, "sso": sso.GetName()}
+}
+
 // Deploy deploys the oauth2 proxy
 func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
-	labels := map[string]string{"app": sso.Spec.UpstreamService, "sso": sso.GetName()}
-
-	secret, err := proxySecret(sso, oidcClient, fakeURL, labels)
+	secret, err := proxySecret(sso, oidcClient, fakeURL, labels(sso))
 	if err != nil {
 		return nil, errors.Wrap(err, "creating oauth2_proxy config")
 	}
@@ -75,7 +78,7 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      buildName(sso.GetName(), sso.GetNamespace()),
 			Namespace: ns,
-			Labels:    labels,
+			Labels:    labels(sso),
 		},
 		Spec: v1.PodSpec{
 			Containers: []v1.Container{proxyContainer(sso)},
@@ -100,11 +103,11 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      deployment,
 			Namespace: ns,
-			Labels:    labels,
+			Labels:    labels(sso),
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: &replicas,
-			Selector: &metav1.LabelSelector{MatchLabels: labels},
+			Selector: &metav1.LabelSelector{MatchLabels: labels(sso)},
 			Template: podTempl,
 			Strategy: appsv1.DeploymentStrategy{
 				Type: appsv1.RollingUpdateDeploymentStrategyType,
@@ -136,7 +139,7 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        service,
 			Namespace:   ns,
-			Labels:      labels,
+			Labels:      labels(sso),
 			Annotations: annotations,
 		},
 		Spec: v1.ServiceSpec{
@@ -146,7 +149,7 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
 				Port:       publicPort,
 				TargetPort: intstr.FromInt(port),
 			}},
-			Selector: labels,
+			Selector: labels(sso),
 		},
 	}
 
@@ -163,7 +166,7 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
 	}
 
 	exists := true
-	err = kubernetes.WaitForService(k8sClient, ns, service, exists, time.Duration(10*time.Second), createTimeout)
+	err = kubernetes.WaitForService(k8sClient, ns, service, exists, createIntervalCheck, createTimeout)
 	if err != nil {
 		return nil, errors.Wrap(err, "wait for service")
 	}
