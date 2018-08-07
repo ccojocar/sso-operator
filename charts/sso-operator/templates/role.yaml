@@ -47,13 +47,13 @@ rules:
   - create
   - update
   - delete
- - apiGroups:
-    - batch
-    resources:
-    - jobs
-    verbs:
-    - get
-    - list
-    - create
-    - update
-    - delete
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  verbs:
+  - get
+  - list
+  - create
+  - update
+  - delete
