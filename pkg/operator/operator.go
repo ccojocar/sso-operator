@@ -2,6 +2,7 @@ package operator
 
 import (
 	"context"
+	"sync"
 
 	"github.com/jenkins-x/sso-operator/pkg/apis/jenkins.io/v1"
 	"github.com/jenkins-x/sso-operator/pkg/dex"
@@ -21,20 +22,62 @@ func NewHandler(dexClient *dex.Client, exposeServiceAccount string) sdk.Handler 
 
 // Handler is a SSO operator event handler
 type Handler struct {
+	mutex                sync.Mutex
 	dexClient            *dex.Client
 	exposeServiceAccount string
+	contexts             []ssoContext
+}
+
+type ssoContext struct {
+	Name     string
+	Namespce string
+}
+
+func (h *Handler) start(sso *v1.SSO) bool {
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
+
+	for _, ctx := range h.contexts {
+		if ctx.Name == sso.GetName() && ctx.Namespce == sso.GetNamespace() {
+			return false
+		}
+	}
+	h.contexts = append(h.contexts, ssoContext{
+		Name:     sso.GetName(),
+		Namespce: sso.GetNamespace(),
+	})
+
+	return true
+}
+
+func (h *Handler) end(sso *v1.SSO) {
+	h.mutex.Lock()
+	h.mutex.Unlock()
+
+	for i, ctx := range h.contexts {
+		if ctx.Name == sso.GetName() && ctx.Namespce == sso.GetNamespace() {
+			h.contexts = append(h.contexts[:i], h.contexts[i+1:]...)
+		}
+	}
 }
 
 // Handle handles SSO operator events
 func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 	switch o := event.Object.(type) {
 	case *v1.SSO:
-		// Ignore the delete event since the garbage collector will clean up all secondary resources for the CR
+		// Ignore the delete event
 		if event.Deleted {
 			return nil
 		}
 
 		sso := o.DeepCopy()
+
+		// Skip this SSO event, already a create is ongoing
+		started := h.start(sso)
+		if !started {
+			return nil
+		}
+		defer h.end(sso)
 
 		// SSO was initialized already
 		if sso.Status.Initialized {

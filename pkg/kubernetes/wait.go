@@ -237,7 +237,6 @@ func WaitForJobComplete(c kubernetes.Interface, namespace, name string, interval
 		case err == nil:
 			conditions := job.Status.Conditions
 			if len(conditions) == 0 {
-				logrus.Infof("No condition found for job %s in namespace %s.", name, namespace)
 				return false, nil
 			}
 			for _, condition := range conditions {
@@ -245,9 +244,10 @@ func WaitForJobComplete(c kubernetes.Interface, namespace, name string, interval
 					return false, fmt.Errorf("job failed: %s", condition.Message)
 				}
 			}
+			logrus.Infof("Job %s in namespace %s is completed.", name, namespace)
 			return true, nil
 		case apierrs.IsNotFound(err):
-			logrus.Infof("job %s in namespace %s not found.", name, namespace)
+			logrus.Infof("Job %s in namespace %s not found.", name, namespace)
 			return false, nil
 		case !IsRetryableAPIError(err):
 			logrus.Infof("Non-retryable failure while getting job.")
