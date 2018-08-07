@@ -89,14 +89,12 @@ func Cleanup(sso *apiv1.SSO, serviceName string, serviceAccount string) error {
 	if err != nil && !apierrors.IsAlreadyExists(err) {
 		return errors.Wrap(err, "building cleanup config map")
 	}
-	configMap.SetOwnerReferences(append(configMap.GetOwnerReferences(), ownerRef(sso)))
 	err = sdk.Create(configMap)
 	if err != nil && apierrors.IsAlreadyExists(err) {
 		return errors.Wrap(err, "creating cleanup config map")
 	}
 
 	job := createJob("cleanup", sso, serviceAccount, cleanupContainer(sso))
-	job.SetOwnerReferences(append(job.GetOwnerReferences(), ownerRef(sso)))
 	err = sdk.Create(job)
 	if err != nil {
 		msg := "creating cleanup job"
