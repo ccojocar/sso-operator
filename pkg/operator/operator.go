@@ -29,12 +29,16 @@ type Handler struct {
 func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 	switch o := event.Object.(type) {
 	case *v1.SSO:
+		sso := o.DeepCopy()
+
 		// Ignore the delete event
 		if event.Deleted {
+			err := proxy.Cleanup(sso, "", h.exposeServiceAccount)
+			if err != nil {
+				return errors.Wrapf(err, "cleaning up '%s' SSO proxy", sso.GetName())
+			}
 			return nil
 		}
-
-		sso := o.DeepCopy()
 
 		// SSO was initialized already
 		if sso.Status.Initialized {
@@ -45,23 +49,23 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		publicClient := true
 		client, err := h.dexClient.CreateClient(ctx, redirectUris, []string{}, publicClient, sso.Name, "")
 		if err != nil {
-			return errors.Wrapf(err, "creating the OIDC client '%s' in dex", sso.Name)
+			return errors.Wrapf(err, "creating the OIDC client '%s' in dex", sso.GetName())
 		}
 
 		p, err := proxy.Deploy(sso, client)
 		if err != nil {
-			return errors.Wrap(err, "deploying SSO proxy")
+			return errors.Wrapf(err, "deploying '%s' SSO proxy", sso.GetName())
 		}
 
 		err = proxy.Expose(sso, p.Service.GetName(), h.exposeServiceAccount)
 		if err != nil {
-			return errors.Wrap(err, "exposing SSO proxy")
+			return errors.Wrapf(err, "exposing '%s' SSO proxy", sso.GetName())
 		}
 
 		sso.Status.Initialized = true
 		err = sdk.Update(sso)
 		if err != nil {
-			return errors.Wrap(err, "updating SSO CRD")
+			return errors.Wrapf(err, "updating '%s' SSO CRD", sso.GetName())
 		}
 
 		logrus.Infof("SSO proxy '%s' initialized", sso.GetName())

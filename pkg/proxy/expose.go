@@ -27,6 +27,8 @@ const (
 	exposer                = "Ingress"
 	exposeTimeout          = time.Duration(5 * time.Minute)
 	exposeCheckInterval    = time.Duration(10 * time.Second)
+	cleanupeTimeout        = time.Duration(2 * time.Minute)
+	cleanupCheckInterval   = time.Duration(10 * time.Second)
 )
 
 // Expose executes the exposecontroller as a Job in order publicly expose the SSO service
@@ -41,7 +43,7 @@ func Expose(sso *apiv1.SSO, serviceName string, serviceAccount string) error {
 		return errors.Wrap(err, "creating expose config map")
 	}
 
-	job := exposeJob(sso, serviceAccount)
+	job := createJob("expose", sso, serviceAccount, exposeContainer(sso))
 	job.SetOwnerReferences(append(job.GetOwnerReferences(), ownerRef(sso)))
 	err = sdk.Create(job)
 	if err != nil {
@@ -64,7 +66,11 @@ func Expose(sso *apiv1.SSO, serviceName string, serviceAccount string) error {
 		return errors.Wrap(err, "waiting for SSO to be exposed")
 	}
 
-	err = sdk.Delete(job)
+	deletePropagation := metav1.DeletePropagationBackground
+	deleteOption := &metav1.DeleteOptions{
+		PropagationPolicy: &deletePropagation,
+	}
+	err = sdk.Delete(job, sdk.WithDeleteOptions(deleteOption))
 	if err != nil {
 		return errors.Wrap(err, "cleaning up the expose job")
 	}
@@ -77,17 +83,69 @@ func Expose(sso *apiv1.SSO, serviceName string, serviceAccount string) error {
 	return nil
 }
 
-func exposeJob(sso *apiv1.SSO, serviceAccount string) *batchv1.Job {
+func Cleanup(sso *apiv1.SSO, serviceName string, serviceAccount string) error {
+	configMap, err := exposeConfigMap(sso, serviceName)
+	if err != nil && !apierrors.IsAlreadyExists(err) {
+		return errors.Wrap(err, "building cleanup config map")
+	}
+	configMap.SetOwnerReferences(append(configMap.GetOwnerReferences(), ownerRef(sso)))
+	err = sdk.Create(configMap)
+	if err != nil && apierrors.IsAlreadyExists(err) {
+		return errors.Wrap(err, "creating cleanup config map")
+	}
+
+	job := createJob("cleanup", sso, serviceAccount, cleanupContainer(sso))
+	job.SetOwnerReferences(append(job.GetOwnerReferences(), ownerRef(sso)))
+	err = sdk.Create(job)
+	if err != nil {
+		msg := "creating cleanup job"
+		if apierrors.IsAlreadyExists(err) {
+			errdel := sdk.Delete(job)
+			if errdel != nil {
+				return errors.Wrapf(errdel, "%s: deleting existing cleanup job", msg)
+			}
+		}
+		return errors.Wrap(err, msg)
+	}
+
+	k8sClient, err := kubernetes.GetClientset()
+	if err != nil {
+		return errors.Wrap(err, "getting k8s client")
+	}
+	err = kubernetes.WaitForJobComplete(k8sClient, sso.GetNamespace(), job.GetName(), cleanupCheckInterval, cleanupeTimeout)
+	if err != nil {
+		return errors.Wrap(err, "waiting for SSO to be cleaned up")
+	}
+
+	deletePropagation := metav1.DeletePropagationBackground
+	deleteOption := &metav1.DeleteOptions{
+		PropagationPolicy: &deletePropagation,
+	}
+	err = sdk.Delete(job, sdk.WithDeleteOptions(deleteOption))
+	if err != nil {
+		return errors.Wrap(err, "deleting the cleanup job")
+	}
+
+	err = sdk.Delete(configMap)
+	if err != nil {
+		return errors.Wrap(err, "deleting the cleanup config map")
+	}
+
+	return nil
+}
+
+func createJob(name string, sso *apiv1.SSO, serviceAccount string, container *v1.Container) *batchv1.Job {
 	ns := sso.GetNamespace()
+	name = fmt.Sprintf("%s-%s", buildName(sso.GetName(), ns), name)
 
 	podTempl := v1.PodTemplateSpec{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      buildName(sso.GetName(), ns),
+			Name:      name,
 			Namespace: ns,
 		},
 		Spec: v1.PodSpec{
 			ServiceAccountName: serviceAccount,
-			Containers:         []v1.Container{exposeContainer(sso)},
+			Containers:         []v1.Container{*container},
 			Volumes: []v1.Volume{{
 				Name: exposeConfigVolumeName,
 				VolumeSource: v1.VolumeSource{
@@ -102,14 +160,13 @@ func exposeJob(sso *apiv1.SSO, serviceAccount string) *batchv1.Job {
 		},
 	}
 
-	jobName := buildName(sso.GetName(), ns)
 	return &batchv1.Job{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Job",
 			APIVersion: "batch/v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      jobName,
+			Name:      name,
 			Namespace: ns,
 		},
 		Spec: batchv1.JobSpec{
@@ -118,13 +175,32 @@ func exposeJob(sso *apiv1.SSO, serviceAccount string) *batchv1.Job {
 	}
 }
 
-func exposeContainer(sso *apiv1.SSO) v1.Container {
-	return v1.Container{
-		Name:            sso.GetName(),
+func exposeContainer(sso *apiv1.SSO) *v1.Container {
+	return &v1.Container{
+		Name:            fmt.Sprintf("%s-expose", sso.GetName()),
 		Image:           fmt.Sprintf("%s:%s", exposeImage, exposeImageTag),
 		ImagePullPolicy: v1.PullIfNotPresent,
 		Command:         []string{exposeCmd},
 		Args:            []string{fmt.Sprintf("--config=%s", exposeConfigPath), "--v", "4"},
+		VolumeMounts: []v1.VolumeMount{{
+			Name:      exposeConfigVolumeName,
+			ReadOnly:  true,
+			MountPath: filepath.Dir(exposeConfigPath),
+		}},
+		Env: []v1.EnvVar{{
+			Name:  exposeEnv,
+			Value: sso.GetNamespace(),
+		}},
+	}
+}
+
+func cleanupContainer(sso *apiv1.SSO) *v1.Container {
+	return &v1.Container{
+		Name:            fmt.Sprintf("%s-cleanup", sso.GetName()),
+		Image:           fmt.Sprintf("%s:%s", exposeImage, exposeImageTag),
+		ImagePullPolicy: v1.PullIfNotPresent,
+		Command:         []string{exposeCmd},
+		Args:            []string{fmt.Sprintf("--config=%s", exposeConfigPath), "--cleanup"},
 		VolumeMounts: []v1.VolumeMount{{
 			Name:      exposeConfigVolumeName,
 			ReadOnly:  true,
