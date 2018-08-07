@@ -83,6 +83,7 @@ func Expose(sso *apiv1.SSO, serviceName string, serviceAccount string) error {
 	return nil
 }
 
+// Cleanup executes the exposecontroller as a job to cleanup the ingress resources
 func Cleanup(sso *apiv1.SSO, serviceName string, serviceAccount string) error {
 	configMap, err := exposeConfigMap(sso, serviceName)
 	if err != nil && !apierrors.IsAlreadyExists(err) {
