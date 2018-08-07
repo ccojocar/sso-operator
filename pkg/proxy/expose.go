@@ -32,7 +32,7 @@ const (
 // Expose executes the exposecontroller as a Job in order publicly expose the SSO service
 func Expose(sso *apiv1.SSO, serviceName string) error {
 	configMap, err := exposeConfigMap(sso, serviceName)
-	if err != nil {
+	if err != nil && !apierrors.IsAlreadyExists(err) {
 		return errors.Wrap(err, "building expose config map")
 	}
 	configMap.SetOwnerReferences(append(configMap.GetOwnerReferences(), ownerRef(sso)))
