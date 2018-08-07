@@ -94,7 +94,7 @@ func Cleanup(sso *apiv1.SSO, serviceName string, serviceAccount string) error {
 		return errors.Wrap(err, "creating cleanup config map")
 	}
 
-	job := createJob("cleanup", sso, serviceAccount, cleanupContainer(sso))
+	job := createJob("cleanup", sso, serviceAccount, cleanupContainer(sso, serviceName))
 	err = sdk.Create(job)
 	if err != nil {
 		msg := "creating cleanup job"
@@ -193,13 +193,13 @@ func exposeContainer(sso *apiv1.SSO) *v1.Container {
 	}
 }
 
-func cleanupContainer(sso *apiv1.SSO) *v1.Container {
+func cleanupContainer(sso *apiv1.SSO, filter string) *v1.Container {
 	return &v1.Container{
 		Name:            fmt.Sprintf("%s-cleanup", sso.GetName()),
 		Image:           fmt.Sprintf("%s:%s", exposeImage, exposeImageTag),
 		ImagePullPolicy: v1.PullIfNotPresent,
 		Command:         []string{exposeCmd},
-		Args:            []string{fmt.Sprintf("--config=%s", exposeConfigPath), "--cleanup"},
+		Args:            []string{fmt.Sprintf("--config=%s", exposeConfigPath), "--cleanup", fmt.Sprintf("--filter=%s", filter)},
 		VolumeMounts: []v1.VolumeMount{{
 			Name:      exposeConfigVolumeName,
 			ReadOnly:  true,
