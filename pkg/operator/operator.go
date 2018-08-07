@@ -33,7 +33,7 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 
 		// Ignore the delete event
 		if event.Deleted {
-			err := proxy.Cleanup(sso, "", h.exposeServiceAccount)
+			err := proxy.Cleanup(sso, sso.GetName(), h.exposeServiceAccount)
 			if err != nil {
 				return errors.Wrapf(err, "cleaning up '%s' SSO proxy", sso.GetName())
 			}
