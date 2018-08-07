@@ -12,15 +12,17 @@ import (
 )
 
 // NewHandler returns a new SSO operator event handler
-func NewHandler(dexClient *dex.Client) sdk.Handler {
+func NewHandler(dexClient *dex.Client, exposeServiceAccount string) sdk.Handler {
 	return &Handler{
-		dexClient: dexClient,
+		dexClient:            dexClient,
+		exposeServiceAccount: exposeServiceAccount,
 	}
 }
 
 // Handler is a SSO operator event handler
 type Handler struct {
-	dexClient *dex.Client
+	dexClient            *dex.Client
+	exposeServiceAccount string
 }
 
 // Handle handles SSO operator events
@@ -51,7 +53,7 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 			return errors.Wrap(err, "deploying SSO proxy")
 		}
 
-		err = proxy.Expose(sso, p.Service.GetName())
+		err = proxy.Expose(sso, p.Service.GetName(), h.exposeServiceAccount)
 		if err != nil {
 			return errors.Wrap(err, "exposing SSO proxy")
 		}

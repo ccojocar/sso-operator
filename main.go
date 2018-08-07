@@ -23,11 +23,12 @@ const port = "8080"
 
 // OperatorOptions holds the command options for SSO operator
 type OperatorOptions struct {
-	Namespace          string
-	DexGrpcHostAndPort string
-	DexGrpcCA          string
-	DexGrpcClientCrt   string
-	DexGrpcClientKey   string
+	Namespace            string
+	DexGrpcHostAndPort   string
+	DexGrpcCA            string
+	DexGrpcClientCrt     string
+	DexGrpcClientKey     string
+	ExposeServiceAccount string
 }
 
 func printVersion(namespace string) {
@@ -85,7 +86,7 @@ func (o *OperatorOptions) Run() {
 
 	// configure the operator
 	sdk.Watch("jenkins.io/v1", "SSO", ns, 5)
-	sdk.Handle(operator.NewHandler(dexClient))
+	sdk.Handle(operator.NewHandler(dexClient, o.ExposeServiceAccount))
 
 	// start the health probe
 	go handleLiveness()
@@ -128,6 +129,7 @@ func commandRoot() *cobra.Command {
 	rootCmd.Flags().StringVarP(&options.DexGrpcCA, "dex-grpc-ca", "", "", "CA for Dex gRPC server and client")
 	rootCmd.Flags().StringVarP(&options.DexGrpcClientCrt, "dex-grpc-client-crt", "", "", "Certificate for Dex gRPC client")
 	rootCmd.Flags().StringVarP(&options.DexGrpcClientKey, "dex-grpc-client-key", "", "", "Key for Dex gRPC client")
+	rootCmd.Flags().StringVarP(&options.ExposeServiceAccount, "expose-sa", "", "default", "Service account for exposecontroller")
 
 	return rootCmd
 }

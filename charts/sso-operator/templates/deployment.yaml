@@ -1,3 +1,4 @@
+{{ $serviceAccount := include "fullname" . }}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -17,7 +18,7 @@ spec:
 {{ toYaml .Values.podAnnotations | indent 8 }}
 {{- end }}
     spec:
-      serviceAccountName: {{ template "fullname" . }}
+      serviceAccountName: {{ $serviceAccount }}
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -28,6 +29,7 @@ spec:
         - "--dex-grpc-ca=/etc/dex/ca/ca.crt"
         - "--dex-grpc-client-crt=/etc/dex/tls/tls.crt"
         - "--dex-grpc-client-key=/etc/dex/tls/tls.key"
+        - "--expose-sa={{ $serviceAccount }}"
         env:
           - name: OPERATOR_NAMESPACE
             value: {{ .Release.Namespace }}

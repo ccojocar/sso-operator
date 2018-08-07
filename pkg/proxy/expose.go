@@ -30,7 +30,7 @@ const (
 )
 
 // Expose executes the exposecontroller as a Job in order publicly expose the SSO service
-func Expose(sso *apiv1.SSO, serviceName string) error {
+func Expose(sso *apiv1.SSO, serviceName string, serviceAccount string) error {
 	configMap, err := exposeConfigMap(sso, serviceName)
 	if err != nil && !apierrors.IsAlreadyExists(err) {
 		return errors.Wrap(err, "building expose config map")
@@ -41,7 +41,7 @@ func Expose(sso *apiv1.SSO, serviceName string) error {
 		return errors.Wrap(err, "creating expose config map")
 	}
 
-	job := exposeJob(sso)
+	job := exposeJob(sso, serviceAccount)
 	job.SetOwnerReferences(append(job.GetOwnerReferences(), ownerRef(sso)))
 	err = sdk.Create(job)
 	if err != nil {
@@ -77,7 +77,7 @@ func Expose(sso *apiv1.SSO, serviceName string) error {
 	return nil
 }
 
-func exposeJob(sso *apiv1.SSO) *batchv1.Job {
+func exposeJob(sso *apiv1.SSO, serviceAccount string) *batchv1.Job {
 	ns := sso.GetNamespace()
 
 	podTempl := v1.PodTemplateSpec{
@@ -87,7 +87,8 @@ func exposeJob(sso *apiv1.SSO) *batchv1.Job {
 			Labels:    labels(sso),
 		},
 		Spec: v1.PodSpec{
-			Containers: []v1.Container{exposeContainer(sso)},
+			ServiceAccountName: serviceAccount,
+			Containers:         []v1.Container{exposeContainer(sso)},
 			Volumes: []v1.Volume{{
 				Name: exposeConfigVolumeName,
 				VolumeSource: v1.VolumeSource{

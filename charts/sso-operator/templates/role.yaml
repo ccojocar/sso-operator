@@ -24,6 +24,11 @@ rules:
   verbs:
   - get
   - list
+  - watch
+  - patch
+  - create
+  - update
+  - delete
 - apiGroups:
   - ""
   resources:
@@ -37,7 +42,10 @@ rules:
   - create
   - update
   - delete
+  - watch
+  - patch
 - apiGroups:
+  - extensions
   - apps
   resources:
   - deployments
@@ -47,6 +55,8 @@ rules:
   - create
   - update
   - delete
+  - watch
+  - patch
 - apiGroups:
   - batch
   resources:
@@ -54,6 +64,19 @@ rules:
   verbs:
   - get
   - list
+  - create
+  - update
+  - delete
+- apiGroups:
+  - ""
+  - "route.openshift.io"
+  resources:
+  - routes
+  verbs:
+  - get
+  - list
+  - watch
+  - patch
   - create
   - update
   - delete
