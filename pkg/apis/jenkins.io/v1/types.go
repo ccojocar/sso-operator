@@ -25,13 +25,17 @@ type SSO struct {
 // SSOSpec is the specification of a Single Sing-On resource
 type SSOSpec struct {
 	// OIDCIssuerURL URL of dex IdP
-	OIDCIssuerURL string `json:"oidcIssuerUrl,omitempty""`
+	OIDCIssuerURL string `json:"oidcIssuerUrl,omitempty"`
 	// Name of the upstream service for which the SSO is created
-	UpstreamService string `json:"upstreamService,omitempty""`
+	UpstreamService string `json:"upstreamService,omitempty"`
+	// Domain name under which the SSO service will be exposed
+	Domain string `json:"domain,omitempty"`
+	// TLS indicates if TLS will enabled in the ingress
+	TLS bool `json:"tls,omitempty"`
 	// Docker image for oauth2_proxy
 	ProxyImage string `json:"proxyImage,omitempty"`
 	// Docker image tag for oauth2_proxy
-	ProxyImageTag string `json:"proxyImageTag,omitempty""`
+	ProxyImageTag string `json:"proxyImageTag,omitempty"`
 	// Resource requirements for oauth2_proxy pod
 	ProxyResources v1.ResourceRequirements `json:"proxyResources,omitempty"`
 	// CookieSpec cookie specifications
@@ -45,7 +49,7 @@ type CookieSpec struct {
 	// Expiration time of the cookie
 	Expire string `json:"expire,omitempty"`
 	// Refresh time of the cookie
-	Refresh string `json:"refresh,omitempt""`
+	Refresh string `json:"refresh,omitempty"`
 	// Cookie is only send over a HTTPS connection
 	Secure bool `json:"secure,omitempty"`
 	// Cookie is not readable from JavaScript
