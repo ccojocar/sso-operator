@@ -325,7 +325,7 @@ func updateProxySecret(secret *v1.Secret, sso *apiv1.SSO, client *api.Client) er
 		return errors.Wrap(err, "creating oauth2_proxy config")
 	}
 
-	secret.StringData[filepath.Dir(configPath)] = config
+	secret.StringData[filepath.Base(configPath)] = config
 
 	err = sdk.Update(secret)
 	if err != nil {
