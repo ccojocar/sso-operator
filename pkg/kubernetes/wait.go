@@ -106,7 +106,7 @@ func WaitForPodComplete(pods corev1.PodInterface, podName string, timeout time.D
 // WaitForPodsWithLabelRunning waits for all matching pods to become Running and at least one matching pod exists.
 func WaitForPodsWithLabelRunning(c kubernetes.Interface, namespace string, label labels.Selector, timeout time.Duration) error {
 	lastKnownPodNumber := -1
-	return wait.PollImmediate(time.Second, timeout, func() (bool, error) {
+	return wait.Poll(time.Second*3, timeout, func() (bool, error) {
 		listOpts := meta_v1.ListOptions{LabelSelector: label.String()}
 		pods, err := c.CoreV1().Pods(namespace).List(listOpts)
 		if err != nil {
