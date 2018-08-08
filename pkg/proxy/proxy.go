@@ -53,7 +53,7 @@ func RedirectURL(URL string) string {
 }
 
 // ConvertHostsToRedirectURLs converts a list of host to proxy redirect URLs
-func CovertHostsToRedirectURLs(hosts []string, sso *apiv1.SSO) []string {
+func ConvertHostsToRedirectURLs(hosts []string, sso *apiv1.SSO) []string {
 	protocol := "http://"
 	if sso.Spec.TLS {
 		protocol = "https://"
@@ -76,7 +76,7 @@ func labels(sso *apiv1.SSO) map[string]string {
 
 // Deploy deploys the oauth2 proxy
 func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
-	secret, err := proxySecret(sso, oidcClient, fakeURL, labels(sso))
+	secret, err := proxySecret(sso, oidcClient, labels(sso))
 	if err != nil {
 		return nil, errors.Wrap(err, "creating oauth2_proxy config")
 	}
@@ -198,6 +198,30 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
 	}, nil
 }
 
+// Update updates the oauth2_proxy secret and deployment
+func Update(proxy *Proxy, sso *apiv1.SSO, client *api.Client) error {
+	err := updateProxySecret(proxy.Secret, sso, client)
+	if err != nil {
+		return errors.Wrap(err, "updating oauth2_proxy secret")
+	}
+
+	err = sdk.Update(proxy.Deployment)
+	if err != nil {
+		return errors.Wrap(err, "updating oauth2_proxy deployment")
+	}
+
+	k8sClient, err := kubernetes.GetClientset()
+	if err != nil {
+		return errors.Wrap(err, "getting k8s client")
+	}
+	label := k8slabels.SelectorFromSet(k8slabels.Set(map[string]string{"sso": sso.GetName()}))
+	err = kubernetes.WaitForPodsWithLabelRunning(k8sClient, sso.GetNamespace(), label, readyTimeout)
+	if err != nil {
+		return errors.Wrap(err, "waiting for SSO proxy")
+	}
+	return nil
+}
+
 func ownerRef(sso *apiv1.SSO) metav1.OwnerReference {
 	controller := true
 	return metav1.OwnerReference{
@@ -255,23 +279,25 @@ func proxyContainer(sso *apiv1.SSO) v1.Container {
 	}
 }
 
-func proxySecret(sso *apiv1.SSO, client *api.Client, proxyURL string,
-	labels map[string]string) (*v1.Secret, error) {
+func proxyConfig(sso *apiv1.SSO, client *api.Client) (string, error) {
 	cookieSecret, err := generateSecret(cookieSecretLen)
 	if err != nil {
-		return nil, errors.Wrap(err, "generating cookie secret")
+		return "", errors.Wrap(err, "generating cookie secret")
 	}
 	upstreamURL, err := getUpstreamURL(sso.Spec.UpstreamService, sso.Namespace)
 	if err != nil {
-		return nil, errors.Wrap(err, "getting the upstream service URL")
+		return "", errors.Wrap(err, "getting the upstream service URL")
 	}
-
-	proxyConfig := &Config{
+	redirectURLs := client.RedirectUris
+	if len(redirectURLs) == 0 {
+		return "", fmt.Errorf("no redirect URL provided")
+	}
+	c := &Config{
 		Port:          port,
 		ClientID:      client.GetId(),
 		ClientSecret:  client.GetSecret(),
 		OIDCIssuerURL: sso.Spec.OIDCIssuerURL,
-		RedirectURL:   FakeRedirectURL(),
+		RedirectURL:   redirectURLs[0],
 		LoginURL:      fmt.Sprintf("%s/auth", sso.Spec.OIDCIssuerURL),
 		RedeemURL:     fmt.Sprintf("%s/token", sso.Spec.OIDCIssuerURL),
 		Upstream:      upstreamURL,
@@ -286,11 +312,34 @@ func proxySecret(sso *apiv1.SSO, client *api.Client, proxyURL string,
 		},
 	}
 
-	config, err := renderConfig(proxyConfig)
+	config, err := renderConfig(c)
 	if err != nil {
-		return nil, errors.Wrap(err, "rendering oauth2_proxy config")
+		return "", errors.Wrap(err, "rendering oauth2_proxy config")
+	}
+	return config, nil
+}
+
+func updateProxySecret(secret *v1.Secret, sso *apiv1.SSO, client *api.Client) error {
+	config, err := proxyConfig(sso, client)
+	if err != nil {
+		return errors.Wrap(err, "creating oauth2_proxy config")
 	}
 
+	secret.StringData[filepath.Dir(configPath)] = config
+
+	err = sdk.Update(secret)
+	if err != nil {
+		return errors.Wrap(err, "updating oauth2_proxy secret")
+	}
+	return nil
+}
+
+func proxySecret(sso *apiv1.SSO, client *api.Client, labels map[string]string) (*v1.Secret, error) {
+
+	config, err := proxyConfig(sso, client)
+	if err != nil {
+		return nil, errors.Wrap(err, "creating oauth2_proxy config")
+	}
 	secret := &v1.Secret{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "v1",

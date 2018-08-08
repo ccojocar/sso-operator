@@ -32,7 +32,7 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 	case *v1.SSO:
 		sso := o.DeepCopy()
 
-		// Ignore the delete event
+		// Cleanup all resources when a SSO CR is deleted
 		if event.Deleted && sso.Status.Initialized {
 			err := proxy.Cleanup(sso, sso.GetName(), h.exposeServiceAccount)
 			if err != nil {
@@ -60,13 +60,13 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		}
 
 		// Deploy the OIDC proxy
-		p, err := proxy.Deploy(sso, client)
+		proxyResources, err := proxy.Deploy(sso, client)
 		if err != nil {
 			return errors.Wrapf(err, "deploying '%s' SSO proxy", sso.GetName())
 		}
 
 		// Expose the OIDC proxy service publicly
-		err = proxy.Expose(sso, p.Service.GetName(), h.exposeServiceAccount)
+		err = proxy.Expose(sso, proxyResources.Service.GetName(), h.exposeServiceAccount)
 		if err != nil {
 			return errors.Wrapf(err, "exposing '%s' SSO proxy", sso.GetName())
 		}
@@ -76,12 +76,20 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		if err != nil {
 			return errors.Wrap(err, "searching ingress hosts")
 		}
-		redirectURLs = proxy.CovertHostsToRedirectURLs(ingressHosts, sso)
+		redirectURLs = proxy.ConvertHostsToRedirectURLs(ingressHosts, sso)
 		err = h.dexClient.UpdateClient(ctx, client.Id, redirectURLs, []string{}, publicClient, "", "")
 		if err != nil {
 			return errors.Wrapf(err, "updating the OIDC client '%s' in dex", client.Id)
 		}
+		client.RedirectUris = redirectURLs
 
+		// Update the OIDC proxy
+		err = proxy.Update(proxyResources, sso, client)
+		if err != nil {
+			return errors.Wrapf(err, "updating '%s' SSO proxy", sso.GetName())
+		}
+
+		// Update the status of SSO CR
 		sso.Status.ClientID = client.Id
 		sso.Status.Initialized = true
 		err = sdk.Update(sso)

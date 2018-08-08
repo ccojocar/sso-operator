@@ -7,7 +7,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// FindIngress searches an ingress resource by name
+// FindIngressHosts searches an ingress resource by name and retrieves its hosts
 func FindIngressHosts(name string, namespace string) ([]string, error) {
 	k8sClient, err := GetClientset()
 	if err != nil {
