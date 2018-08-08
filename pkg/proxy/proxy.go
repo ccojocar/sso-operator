@@ -205,15 +205,26 @@ func Update(proxy *Proxy, sso *apiv1.SSO, client *api.Client) error {
 		return errors.Wrap(err, "updating oauth2_proxy secret")
 	}
 
-	err = sdk.Update(proxy.Deployment)
-	if err != nil {
-		return errors.Wrap(err, "updating oauth2_proxy deployment")
-	}
-
 	k8sClient, err := kubernetes.GetClientset()
 	if err != nil {
 		return errors.Wrap(err, "getting k8s client")
 	}
+
+	namespace := sso.GetNamespace()
+	deploymentList, err := k8sClient.AppsV1().Deployments(namespace).List(metav1.ListOptions{})
+	if err != nil {
+		return errors.Wrap(err, "listing deployments")
+	}
+	deploymentName := proxy.Deployment.GetName()
+	for _, deployment := range deploymentList.Items {
+		if deployment.GetName() == deploymentName {
+			err = sdk.Update(&deployment)
+			if err != nil {
+				return errors.Wrap(err, "updating oauth2_proxy deployment")
+			}
+		}
+	}
+
 	label := k8slabels.SelectorFromSet(k8slabels.Set(map[string]string{"sso": sso.GetName()}))
 	err = kubernetes.WaitForPodsWithLabelRunning(k8sClient, sso.GetNamespace(), label, readyTimeout)
 	if err != nil {
