@@ -380,7 +380,6 @@ func updateProxySecret(secret *v1.Secret, sso *apiv1.SSO, client *api.Client) er
 }
 
 func proxySecret(sso *apiv1.SSO, client *api.Client, labels map[string]string) (*v1.Secret, error) {
-
 	config, err := proxyConfig(sso, client)
 	if err != nil {
 		return nil, errors.Wrap(err, "creating oauth2_proxy config")
@@ -434,16 +433,11 @@ func getUpstreamURL(upstreamService string, namespace string) (string, error) {
 	if err != nil {
 		return "", errors.Wrapf(err, "listing services in namespace '%s'", namespace)
 	}
-	var foundService *v1.Service
 	for _, service := range serviceList.Items {
-		if service.Name == upstreamService {
-			foundService = &service
+		if service.GetName() == upstreamService {
+			port := service.Spec.Ports[0].Port
+			return fmt.Sprintf("http://%s:%d", service.Name, port), nil
 		}
 	}
-	if foundService == nil {
-		return "", fmt.Errorf("no service '%s' found in namespace '%s'", upstreamService, namespace)
-	}
-
-	port := foundService.Spec.Ports[0].Port
-	return fmt.Sprintf("http://%s:%d", foundService.Name, port), nil
+	return "", fmt.Errorf("no service '%s' found in namespace '%s'", upstreamService, namespace)
 }
