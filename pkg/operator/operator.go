@@ -32,10 +32,15 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		sso := o.DeepCopy()
 
 		// Ignore the delete event
-		if event.Deleted {
+		if event.Deleted && sso.Status.Initialized {
 			err := proxy.Cleanup(sso, sso.GetName(), h.exposeServiceAccount)
 			if err != nil {
 				return errors.Wrapf(err, "cleaning up '%s' SSO proxy", sso.GetName())
+			}
+			clientID := sso.Status.ClientID
+			err = h.dexClient.DeleteClient(ctx, clientID)
+			if err != nil {
+				return errors.Wrapf(err, "deleting OIDC client '%s' from dex", clientID)
 			}
 			return nil
 		}
@@ -62,6 +67,7 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 			return errors.Wrapf(err, "exposing '%s' SSO proxy", sso.GetName())
 		}
 
+		sso.Status.ClientID = client.Id
 		sso.Status.Initialized = true
 		err = sdk.Update(sso)
 		if err != nil {

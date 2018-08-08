@@ -58,6 +58,8 @@ type CookieSpec struct {
 
 // SSOStatus is the status of an Single Sign-On resource
 type SSOStatus struct {
+	// OIDC client ID created in dex
+	ClientID string `json:"clientId,omitempty" protobuf:"bytes,2,opt,name=clientId"`
 	// Initialized indicated if the SSO was configured in dex and oauth2_proxy
 	Initialized bool `json:"initialized,omitempty" protobuf:"bytes,2,opt,name=initialized"`
 }
