@@ -226,6 +226,10 @@ func Update(proxy *Proxy, sso *apiv1.SSO, client *api.Client) error {
 			for _, container := range containers {
 				updateContainer(&container, secretVersion)
 			}
+			deployment.TypeMeta = metav1.TypeMeta{
+				Kind:       "Deployment",
+				APIVersion: "apps/v1",
+			}
 			err = sdk.Update(&deployment)
 			if err != nil {
 				return errors.Wrap(err, "updating oauth2_proxy deployment")
