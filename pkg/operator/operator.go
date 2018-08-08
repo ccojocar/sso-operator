@@ -53,7 +53,7 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 
 		// Crate a new OIDC client in dex
 		redirectURLs := []string{proxy.FakeRedirectURL()}
-		publicClient := true
+		publicClient := false
 		client, err := h.dexClient.CreateClient(ctx, redirectURLs, []string{}, publicClient, sso.Name, "")
 		if err != nil {
 			return errors.Wrapf(err, "creating the OIDC client '%s' in dex", sso.GetName())
@@ -77,7 +77,7 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 			return errors.Wrap(err, "searching ingress hosts")
 		}
 		redirectURLs = proxy.ConvertHostsToRedirectURLs(ingressHosts, sso)
-		err = h.dexClient.UpdateClient(ctx, client.Id, redirectURLs, []string{}, publicClient, "", "")
+		err = h.dexClient.UpdateClient(ctx, client.Id, redirectURLs, []string{}, publicClient, sso.Name, "")
 		if err != nil {
 			return errors.Wrapf(err, "updating the OIDC client '%s' in dex", client.Id)
 		}
