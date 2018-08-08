@@ -5,6 +5,7 @@ import (
 
 	"github.com/jenkins-x/sso-operator/pkg/apis/jenkins.io/v1"
 	"github.com/jenkins-x/sso-operator/pkg/dex"
+	"github.com/jenkins-x/sso-operator/pkg/kubernetes"
 	"github.com/jenkins-x/sso-operator/pkg/proxy"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/pkg/errors"
@@ -50,21 +51,35 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 			return nil
 		}
 
-		redirectUris := []string{proxy.FakeRedirectURL()}
+		// Crate a new OIDC client in dex
+		redirectURLs := []string{proxy.FakeRedirectURL()}
 		publicClient := true
-		client, err := h.dexClient.CreateClient(ctx, redirectUris, []string{}, publicClient, sso.Name, "")
+		client, err := h.dexClient.CreateClient(ctx, redirectURLs, []string{}, publicClient, sso.Name, "")
 		if err != nil {
 			return errors.Wrapf(err, "creating the OIDC client '%s' in dex", sso.GetName())
 		}
 
+		// Deploy the OIDC proxy
 		p, err := proxy.Deploy(sso, client)
 		if err != nil {
 			return errors.Wrapf(err, "deploying '%s' SSO proxy", sso.GetName())
 		}
 
+		// Expose the OIDC proxy service publicly
 		err = proxy.Expose(sso, p.Service.GetName(), h.exposeServiceAccount)
 		if err != nil {
 			return errors.Wrapf(err, "exposing '%s' SSO proxy", sso.GetName())
+		}
+
+		// Update in dex the redirect URL of the OIDC client
+		ingressHosts, err := kubernetes.FindIngressHosts(sso.GetName(), sso.GetNamespace())
+		if err != nil {
+			return errors.Wrap(err, "searching ingress hosts")
+		}
+		redirectURLs = proxy.CovertHostsToRedirectURLs(ingressHosts, sso)
+		err = h.dexClient.UpdateClient(ctx, client.Id, redirectURLs, []string{}, publicClient, "", "")
+		if err != nil {
+			return errors.Wrapf(err, "updating the OIDC client '%s' in dex", client.Id)
 		}
 
 		sso.Status.ClientID = client.Id

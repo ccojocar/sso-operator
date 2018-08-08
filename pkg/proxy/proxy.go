@@ -52,6 +52,20 @@ func RedirectURL(URL string) string {
 	return fmt.Sprintf("%s/oauth2/callback", URL)
 }
 
+// ConvertHostsToRedirectURLs converts a list of host to proxy redirect URLs
+func CovertHostsToRedirectURLs(hosts []string, sso *apiv1.SSO) []string {
+	protocol := "http://"
+	if sso.Spec.TLS {
+		protocol = "https://"
+	}
+	redirectURLs := []string{}
+	for _, host := range hosts {
+		redirectURL := RedirectURL(fmt.Sprintf("%s%s", protocol, host))
+		redirectURLs = append(redirectURLs, redirectURL)
+	}
+	return redirectURLs
+}
+
 func buildName(name string, namespace string) string {
 	return fmt.Sprintf("%s-%s", namespace, name)
 }
