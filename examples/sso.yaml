@@ -1,0 +1,25 @@
+apiVersion: "jenkins.io/v1"
+kind: "SSO"
+metadata:
+  name: "sso-golang-http"
+  namespace: jx-staging
+spec:
+  oidcIssuerUrl: "http://dex.jx-staging.35.187.37.181.nip.io"
+  upstreamService: "golang-http"
+  domain: "35.187.37.181.nip.io"
+  tls: false
+  proxyImage: "cosmincojocar/oauth2_proxy"
+  proxyImageTag: "latest"
+  proxyResources:
+    limits:
+      cpu: 100m
+      memory: 256Mi
+    requests:
+      cpu: 80m
+      memory: 128Mi
+  cookieSpec:
+    name: "sso-golang-http"
+    expire: "168h"
+    refresh: "60m"
+    secure: false
+    httpOnly: true
