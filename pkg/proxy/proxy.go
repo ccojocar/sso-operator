@@ -264,7 +264,7 @@ func proxySecret(sso *apiv1.SSO, client *api.Client, proxyURL string,
 		Cookie: Cookie{
 			Name:     sso.Spec.CookieSpec.Name,
 			Secret:   cookieSecret,
-			Domain:   proxyURL,
+			Domain:   sso.Spec.Domain,
 			Expire:   sso.Spec.CookieSpec.Expire,
 			Refresh:  sso.Spec.CookieSpec.Refresh,
 			Secure:   sso.Spec.CookieSpec.Secure,
