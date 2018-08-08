@@ -2,6 +2,8 @@ package proxy
 
 import (
 	"crypto/rand"
+	"crypto/sha256"
+	"encoding/base64"
 	"fmt"
 	"path/filepath"
 	"time"
@@ -23,6 +25,7 @@ const (
 	configPath          = "/config/oauth2_proxy.cfg"
 	configVolumeName    = "proxy-config"
 	configSecretName    = "proxy-secret" // #nosec
+	secretVersionEnv    = "SECRET_VERSION"
 	portName            = "proxy-port"
 	port                = 4180
 	healthPath          = "/ping"
@@ -87,7 +90,7 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
 	}
 
 	ns := sso.GetNamespace()
-
+	secretVersion := computeSecretVersion(secret)
 	podTempl := v1.PodTemplateSpec{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      buildName(sso.GetName(), sso.GetNamespace()),
@@ -95,7 +98,7 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
 			Labels:    labels(sso),
 		},
 		Spec: v1.PodSpec{
-			Containers: []v1.Container{proxyContainer(sso)},
+			Containers: []v1.Container{proxyContainer(sso, secretVersion)},
 			Volumes: []v1.Volume{{
 				Name: configVolumeName,
 				VolumeSource: v1.VolumeSource{
@@ -215,9 +218,14 @@ func Update(proxy *Proxy, sso *apiv1.SSO, client *api.Client) error {
 	if err != nil {
 		return errors.Wrap(err, "listing deployments")
 	}
+	secretVersion := computeSecretVersion(proxy.Secret)
 	deploymentName := proxy.Deployment.GetName()
 	for _, deployment := range deploymentList.Items {
 		if deployment.GetName() == deploymentName {
+			containers := deployment.Spec.Template.Spec.Containers
+			for _, container := range containers {
+				updateContainer(&container, secretVersion)
+			}
 			err = sdk.Update(&deployment)
 			if err != nil {
 				return errors.Wrap(err, "updating oauth2_proxy deployment")
@@ -233,6 +241,24 @@ func Update(proxy *Proxy, sso *apiv1.SSO, client *api.Client) error {
 	return nil
 }
 
+func updateContainer(container *v1.Container, secretVersion string) {
+	for i, env := range container.Env {
+		if env.Name == secretVersionEnv {
+			container.Env[i].Value = secretVersion
+		}
+	}
+}
+
+func computeSecretVersion(secret *v1.Secret) string {
+	secretData := ""
+	for k, v := range secret.StringData {
+		secretData += k + v
+	}
+	hash := sha256.Sum256([]byte(secretData))
+	secretVersion := base64.URLEncoding.EncodeToString(hash[:])
+	return secretVersion
+}
+
 func ownerRef(sso *apiv1.SSO) metav1.OwnerReference {
 	controller := true
 	return metav1.OwnerReference{
@@ -244,7 +270,7 @@ func ownerRef(sso *apiv1.SSO) metav1.OwnerReference {
 	}
 }
 
-func proxyContainer(sso *apiv1.SSO) v1.Container {
+func proxyContainer(sso *apiv1.SSO, secretVersion string) v1.Container {
 	return v1.Container{
 		Name:            sso.GetName(),
 		Image:           fmt.Sprintf("%s:%s", sso.Spec.ProxyImage, sso.Spec.ProxyImageTag),
@@ -260,6 +286,10 @@ func proxyContainer(sso *apiv1.SSO) v1.Container {
 			Name:      configVolumeName,
 			ReadOnly:  true,
 			MountPath: filepath.Dir(configPath),
+		}},
+		Env: []v1.EnvVar{{
+			Name:  secretVersionEnv,
+			Value: secretVersion,
 		}},
 		LivenessProbe: &v1.Probe{
 			Handler: v1.Handler{
