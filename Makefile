@@ -69,5 +69,5 @@ linux:
 watch:
 	reflex -r "\.go$" -R "vendor.*" make skaffold-run
 
-skaffold-run: build
-	skaffold run -p dev
+install-helm: linux
+	skaffold run -p install -n $(KUBERNETES_NAMESPACE)

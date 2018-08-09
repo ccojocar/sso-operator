@@ -13,11 +13,11 @@ deploy:
   kubectl:
     manifests:
 profiles:
-- name: dev
+- name: install
   build:
     tagPolicy:
       envTemplate:
-        template: "{{.DOCKER_REGISTRY}}/jenkins-x/sso-operator:{{.DIGEST_HEX}}"
+        template: "{{.DOCKER_REGISTRY}}/sso-operator:{{.VERSION}}"
     artifacts:
     - docker: {}
     local: {}
@@ -27,6 +27,6 @@ profiles:
       - name: sso-operator
         chartPath: charts/sso-operator
         setValueTemplates:
-          image.repository: "{{.DOCKER_REGISTRY}}/jenkins-x/sso-operator"
+          image.repository: "{{.DOCKER_REGISTRY}}/sso-operator"
           image.tag: "{{.TAG}}"
         
