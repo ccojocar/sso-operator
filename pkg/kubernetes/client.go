@@ -19,6 +19,7 @@ package kubernetes
 import (
 	"fmt"
 
+	"github.com/jenkins-x/sso-operator/pkg/client/clientset/versioned"
 	"github.com/pkg/errors"
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
@@ -50,8 +51,18 @@ func GetClientConfig() (*restclient.Config, error) {
 func GetAPIExtensionsClient() (apiextensionsclientset.Interface, error) {
 	config, err := GetClientConfig()
 	if err != nil {
-		return nil, errors.Wrap(err, "getting client config for kubernetes client")
+		return nil, errors.Wrap(err, "getting client config for api extensions client")
 	}
 
 	return apiextensionsclientset.NewForConfig(config)
+}
+
+// GetJenkinsClient returns the Jenkins CRDs client
+func GetJenkinsClient() (versioned.Interface, error) {
+	config, err := GetClientConfig()
+	if err != nil {
+		return nil, errors.Wrap(err, "getting client config for jenkins client")
+	}
+
+	return versioned.NewForConfig(config)
 }

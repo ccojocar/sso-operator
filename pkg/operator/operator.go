@@ -46,10 +46,16 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 			return nil
 		}
 
-		// SSO was initialized already
-		if sso.Status.Initialized {
+		// Check if SSO was already initialized
+		initialized, err := kubernetes.IsSSOInitialized(sso)
+		if err != nil {
+			logrus.Infof("Failed to get the status of SSO '%s'. Error: %v", sso.GetName(), err)
+			initialized = false
+		}
+		if initialized {
 			return nil
 		}
+		logrus.Infof("Initializing SSO '%s'", sso.GetName())
 
 		// Crate a new OIDC client in dex
 		redirectURLs := []string{proxy.FakeRedirectURL()}
