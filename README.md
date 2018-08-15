@@ -4,19 +4,27 @@ Single Sign-On Kubernetes [operator](https://coreos.com/operators/) for [dex](ht
 
 ## Prerequisites
 
-The operator requires a [dex](https://github.com/coreos/dex) identity provider, which could be installed into your cluster using this [helm chart](https://github.com/helm/charts/tree/master/stable/dex):
+The operator requires the [dex](https://github.com/coreos/dex) identity provider, which could be installed into your cluster using this [helm chart](https://github.com/jenkins-x/dex/tree/master/charts/dex).
+The chart will also install [cert-manager](https://github.com/jetstack/cert-manager), that will issue the gRPC client certificate for `sso-operator`.
+
+Before starting the installation, you have to create a [GitHub OAuth App](https://github.com/settings/applications/new) which has the `callback` *https://DEX_DOMAIN/callback*.
 
 ```
-helm install --name dex --namesapce <DEX NAMESPACE> .
+helm upgrade -i --namespace <NAMESAPCE> --wait --timeout 600 dex \
+         --set issuer="<https://<DEX_DOMAIN>" \
+         --set connectors.github.config.clientID="<CLIENT_ID>" \
+         --set connectors.github.config.clientSecret="<CLIENT_SECRET>" \
+         --set connectors.github.config.orgs="<GITHUB_ORG>" \
+         .
 ```
 
-If you decide to install `dex` in a different `namespace` than the operator, you will have to enable in the operator helm chart, the job which installs the `gRPC` certificates.
+If you decide to install `dex` in a different `namespace` than the operator, you will have to enable in the operator helm chart, the job which installs the `gRPC` CA certificate.
 
 To do this, open the `charts/sso-operator/values.yaml` file and update the following values:
 
 ```
 dex.certs.install.create: true
-dex.certs.install.sourceNamespace: <DEX NAMESPACE>
+dex.certs.install.sourceNamespace: <DEX_NAMESPACE>
 ```
 Also the `dex` service will have to be publicly exposed using an ingress controller of your choice.
 
@@ -77,9 +85,9 @@ metadata:
   name: "sso-golang-http"
   namespace: jx-staging
 spec:
-  oidcIssuerUrl: "<YOUR DEX URL>"
+  oidcIssuerUrl: "<DEX_URL>"
   upstreamService: "golang-http"
-  domain: "<YOUR DOMAIN>"
+  domain: "<SSO_DOMAIN>"
   tls: false
   proxyImage: "cosmincojocar/oauth2_proxy"
   proxyImageTag: "latest"
@@ -99,7 +107,7 @@ spec:
 EOF
 ```
 
-__Note:__ You will have to update *YOUR DEX URL* and *YOUR DOMAIN* with your specific values.
+__Note:__ You will have to update *DEX_URL* and *SSO_DOMAIN* with your specific values.
 
 A SSO proxy will be automatically created by the operator and publicly exposed under your domain. You can see the proxy URL with:
 
