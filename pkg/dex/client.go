@@ -19,7 +19,7 @@ type Client struct {
 }
 
 // NewClient creates a new Dex client
-func NewClient(hostAndPort, caPath, clientCrt, clientKey string) (*Client, error) {
+func NewClient(hostAndPort, clientCrt, clientKey string) (*Client, error) {
 	certPool := x509.NewCertPool()
 	caCert, err := ioutil.ReadFile(clientCrt) // #nosec
 	if err != nil {

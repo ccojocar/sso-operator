@@ -25,7 +25,6 @@ const port = "8080"
 type OperatorOptions struct {
 	Namespace            string
 	DexGrpcHostAndPort   string
-	DexGrpcCA            string
 	DexGrpcClientCrt     string
 	DexGrpcClientKey     string
 	ExposeServiceAccount string
@@ -64,7 +63,7 @@ func (o *OperatorOptions) Run() {
 		os.Exit(2)
 	}
 
-	dexClient, err := dex.NewClient(o.DexGrpcHostAndPort, o.DexGrpcCA, o.DexGrpcClientCrt, o.DexGrpcClientKey)
+	dexClient, err := dex.NewClient(o.DexGrpcHostAndPort, o.DexGrpcClientCrt, o.DexGrpcClientKey)
 	if err != nil {
 		logrus.Errorf("failed to crate dex client: %v", err)
 		os.Exit(2)
@@ -100,9 +99,6 @@ func (o *OperatorOptions) Validate() error {
 	if o.DexGrpcHostAndPort == "" {
 		return errors.New("dex gRPC server host and port is empty")
 	}
-	if _, err := os.Stat(o.DexGrpcCA); os.IsNotExist(err) {
-		return fmt.Errorf("provided dex gRPC CA file '%s' does not exist", o.DexGrpcCA)
-	}
 	if _, err := os.Stat(o.DexGrpcClientCrt); os.IsNotExist(err) {
 		return fmt.Errorf("provided dex gRPC client cert file '%s' does not exist", o.DexGrpcClientCrt)
 	}
@@ -126,7 +122,6 @@ func commandRoot() *cobra.Command {
 
 	rootCmd.Flags().StringVarP(&options.Namespace, "namespace", "n", "", "Namespace where the operator will watch for resources")
 	rootCmd.Flags().StringVarP(&options.DexGrpcHostAndPort, "dex-grpc-host-port", "", "", "Host and port of Dex gRPC server")
-	rootCmd.Flags().StringVarP(&options.DexGrpcCA, "dex-grpc-ca", "", "", "CA for Dex gRPC server and client")
 	rootCmd.Flags().StringVarP(&options.DexGrpcClientCrt, "dex-grpc-client-crt", "", "", "Certificate for Dex gRPC client")
 	rootCmd.Flags().StringVarP(&options.DexGrpcClientKey, "dex-grpc-client-key", "", "", "Key for Dex gRPC client")
 	rootCmd.Flags().StringVarP(&options.ExposeServiceAccount, "expose-sa", "", "default", "Service account for exposecontroller")
