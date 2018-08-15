@@ -18,14 +18,6 @@ helm upgrade -i --namespace <NAMESAPCE> --wait --timeout 600 dex \
          .
 ```
 
-If you decide to install `dex` in a different `namespace` than the operator, you will have to enable in the operator helm chart, the job which installs the `gRPC` CA certificate.
-
-To do this, open the `charts/sso-operator/values.yaml` file and update the following values:
-
-```
-dex.certs.install.create: true
-dex.certs.install.sourceNamespace: <DEX_NAMESPACE>
-```
 Also the `dex` service will have to be publicly exposed using an ingress controller of your choice.
 
 ## Installation
