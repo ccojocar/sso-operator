@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"io/ioutil"
 
 	"github.com/coreos/dex/api"
 	"github.com/pkg/errors"
@@ -19,6 +20,16 @@ type Client struct {
 
 // NewClient creates a new Dex client
 func NewClient(hostAndPort, caPath, clientCrt, clientKey string) (*Client, error) {
+	certPool := x509.NewCertPool()
+	caCert, err := ioutil.ReadFile(clientCrt) // #nosec
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to load the public CA cert '%s'", clientCrt)
+	}
+	appended := certPool.AppendCertsFromPEM(caCert)
+	if !appended {
+		return nil, errors.New("failed to append the CA cert to the certs pool")
+	}
+
 	clientCert, err := tls.LoadX509KeyPair(clientCrt, clientKey)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to load the client cert '%s' and key '%s'", clientCrt, clientKey)
@@ -27,13 +38,6 @@ func NewClient(hostAndPort, caPath, clientCrt, clientKey string) (*Client, error
 	// The CA public cert should be packaged with the client cert
 	if len(clientCert.Certificate) != 2 {
 		return nil, fmt.Errorf("failed to load the CA cert from '%s'", clientCrt)
-	}
-
-	caCert := clientCert.Certificate[1]
-	certPool := x509.NewCertPool()
-	appended := certPool.AppendCertsFromPEM(caCert)
-	if !appended {
-		return nil, errors.New("failed to append the CA cert to the certs pool")
 	}
 
 	clientTLSConfig := &tls.Config{
