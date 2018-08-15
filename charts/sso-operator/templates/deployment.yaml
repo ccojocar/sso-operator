@@ -26,7 +26,6 @@ spec:
         command: ["/sso-operator"]
         args:
         - "--dex-grpc-host-port={{ .Values.dex.grpcHostAndPort }}"
-        - "--dex-grpc-ca=/etc/dex/ca/ca.crt"
         - "--dex-grpc-client-crt=/etc/dex/tls/tls.crt"
         - "--dex-grpc-client-key=/etc/dex/tls/tls.key"
         - "--expose-sa={{ $serviceAccount }}"
@@ -34,8 +33,6 @@ spec:
           - name: OPERATOR_NAMESPACE
             value: {{ .Release.Namespace }}
         volumeMounts:
-          - name: dex-grpc-ca
-            mountPath: /etc/dex/ca
           - name: dex-grpc-client-cert
             mountPath: /etc/dex/tls
         ports:
@@ -58,9 +55,6 @@ spec:
         resources:
 {{ toYaml .Values.resources | indent 12 }}
       volumes:
-      - name: dex-grpc-ca
-        configMap:
-          name: {{ .Values.dex.certs.grpc.ca.secretName }} 
       - name: dex-grpc-client-cert
         secret:
           defaultMode: 420

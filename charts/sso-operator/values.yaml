@@ -39,14 +39,5 @@ dex:
     grpc:
       issuer:
         name: dex-dex-grpc-issuer
-      ca:
-        secretName: dex-grpc-ca
       client:
         secretName: dex-grpc-client-cert
-    install:
-      create: false
-      image: gcr.io/google_containers/kubernetes-dashboard-init-amd64
-      imageTag: "v1.0.0"
-      imagePullPolicy: "IfNotPresent"
-      sourceNamespace: jx-staging
-      activeDeadlineSeconds: 300
