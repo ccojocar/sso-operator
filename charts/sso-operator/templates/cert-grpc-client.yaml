@@ -1,0 +1,16 @@
+{{ $fullname := include "fullname" . }}
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: {{ $fullname }}-grpc-client-cert
+  labels:
+    app: {{ $fullname }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+spec:
+  secretName: {{ .Values.dex.certs.grpc.client.secretName }}
+  issuerRef:
+    name: {{ .Values.dex.certs.grpc.issuer.name }}
+    kind: ClusterIssuer
+  commonName: dex-grpc-client
+  dnsName:
+  - dex

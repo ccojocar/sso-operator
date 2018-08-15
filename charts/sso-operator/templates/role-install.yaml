@@ -11,6 +11,6 @@ metadata:
   name: {{ template "fullname" . }}-install-certs
 rules:
 - apiGroups: [""]
-  resources: ["secrets", "configmaps"]
+  resources: ["configmaps"]
   verbs: ["*"]
 {{- end }}

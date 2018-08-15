@@ -31,13 +31,10 @@ spec:
         - /bin/bash
         - -exc
         - |
-          # Cleanup the existing config map and secrets
+          # Cleanup the existing config map
           kubectl delete configmap {{ $caName }} --namespace {{ .Release.Namespace }} || true
-          kubectl delete secret {{ $clientTlsSecretName }} --namespace {{ .Release.Namespace }} || true
 
-          # Copy the secrts from source namespace
-          kubectl get secret {{ $clientTlsSecretName }} --namespace={{ $sourceNamespace }} --export -o yaml |\
-          kubectl apply --namespace={{ .Release.Namespace }} -f -
+          # Copy the CA certificate
           kubectl get cm {{ $caName }} --namespace={{ $sourceNamespace }} --export -o yaml |\
           kubectl apply --namespace={{ .Release.Namespace }} -f -
 {{- end }}

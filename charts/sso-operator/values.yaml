@@ -36,8 +36,13 @@ terminationGracePeriodSeconds: 10
 dex:
   grpcHostAndPort: dex:5000 
   certs:
-    grpcCA: dex-grpc-ca
-    grpcClientTls: dex-grpc-client-tls
+    grpc:
+      issuer:
+        name: dex-dex-grpc-issuer
+      ca:
+        secretName: dex-grpc-ca
+      client:
+        secretName: dex-grpc-client-cert
     install:
       create: false
       image: gcr.io/google_containers/kubernetes-dashboard-init-amd64

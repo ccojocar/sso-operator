@@ -36,7 +36,7 @@ spec:
         volumeMounts:
           - name: dex-grpc-ca
             mountPath: /etc/dex/ca
-          - name: dex-grpc-client-tls
+          - name: dex-grpc-client-cert
             mountPath: /etc/dex/tls
         ports:
         - containerPort: {{ .Values.service.internalPort }}
@@ -60,10 +60,10 @@ spec:
       volumes:
       - name: dex-grpc-ca
         configMap:
-          name: {{ .Values.dex.certs.grpcCA }} 
-      - name: dex-grpc-client-tls
+          name: {{ .Values.dex.certs.grpc.ca.secretName }} 
+      - name: dex-grpc-client-cert
         secret:
           defaultMode: 420
-          secretName: {{ .Values.dex.certs.grpcClientTls }}
+          secretName: {{ .Values.dex.certs.grpc.client.secretName }}
 
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
