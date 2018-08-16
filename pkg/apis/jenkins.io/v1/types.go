@@ -30,8 +30,6 @@ type SSOSpec struct {
 	UpstreamService string `json:"upstreamService,omitempty"`
 	// Domain name under which the SSO service will be exposed
 	Domain string `json:"domain,omitempty"`
-	// TLS indicates if TLS will enabled in the ingress
-	TLS bool `json:"tls,omitempty"`
 	// Docker image for oauth2_proxy
 	ProxyImage string `json:"proxyImage,omitempty"`
 	// Docker image tag for oauth2_proxy

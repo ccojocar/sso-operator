@@ -217,8 +217,8 @@ func exposeConfigMap(sso *apiv1.SSO, serviceName string) (*v1.ConfigMap, error) 
 		Domain:   sso.Spec.Domain,
 		Exposer:  exposer,
 		PathMode: "",
-		HTTP:     !sso.Spec.TLS,
-		TLSAcme:  sso.Spec.TLS,
+		HTTP:     false,
+		TLSAcme:  true,
 		Services: []string{serviceName},
 	}
 

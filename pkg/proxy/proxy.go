@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/coreos/dex/api"
@@ -32,7 +33,7 @@ const (
 	replicas            = 1
 	publicPort          = 80
 	cookieSecretLen     = 32
-	fakeURL             = "http://fake-oauth2-proxy"
+	fakeURL             = "https://fake-oauth2-proxy"
 	createTimeout       = time.Duration(60 * time.Second)
 	createIntervalCheck = time.Duration(10 * time.Second)
 	readyTimeout        = time.Duration(5 * time.Minute)
@@ -57,13 +58,9 @@ func RedirectURL(URL string) string {
 
 // ConvertHostsToRedirectURLs converts a list of host to proxy redirect URLs
 func ConvertHostsToRedirectURLs(hosts []string, sso *apiv1.SSO) []string {
-	protocol := "http://"
-	if sso.Spec.TLS {
-		protocol = "https://"
-	}
 	redirectURLs := []string{}
 	for _, host := range hosts {
-		redirectURL := RedirectURL(fmt.Sprintf("%s%s", protocol, host))
+		redirectURL := RedirectURL(fmt.Sprintf("https://%s", host))
 		redirectURLs = append(redirectURLs, redirectURL)
 	}
 	return redirectURLs
@@ -335,7 +332,11 @@ func proxyConfig(sso *apiv1.SSO, client *api.Client) (string, error) {
 	}
 	redirectURLs := client.RedirectUris
 	if len(redirectURLs) == 0 {
-		return "", fmt.Errorf("no redirect URL provided")
+		return "", errors.New("no redirect URL provided")
+	}
+	issuerURL := sso.Spec.OIDCIssuerURL
+	if !strings.HasPrefix(issuerURL, "https://") {
+		return "", errors.New("issuer URL must used HTTPS")
 	}
 	c := &Config{
 		Port:          port,
@@ -343,8 +344,8 @@ func proxyConfig(sso *apiv1.SSO, client *api.Client) (string, error) {
 		ClientSecret:  client.GetSecret(),
 		OIDCIssuerURL: sso.Spec.OIDCIssuerURL,
 		RedirectURL:   redirectURLs[0],
-		LoginURL:      fmt.Sprintf("%s/auth", sso.Spec.OIDCIssuerURL),
-		RedeemURL:     fmt.Sprintf("%s/token", sso.Spec.OIDCIssuerURL),
+		LoginURL:      fmt.Sprintf("%s/auth", issuerURL),
+		RedeemURL:     fmt.Sprintf("%s/token", issuerURL),
 		Upstream:      upstreamURL,
 		Cookie: Cookie{
 			Name:     sso.Spec.CookieSpec.Name,
