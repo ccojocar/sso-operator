@@ -4,9 +4,9 @@ metadata:
   name: "sso-golang-http"
   namespace: jx-staging
 spec:
-  oidcIssuerUrl: "http://dex.jx-staging.35.187.37.181.nip.io"
+  oidcIssuerUrl: "https://dex.jx-staging.jx.cosmin.rawlings.it"
   upstreamService: "golang-http"
-  domain: "35.187.37.181.nip.io"
+  domain: "jx.cosmin.rawlings.it"
   tls: false
   proxyImage: "cosmincojocar/oauth2_proxy"
   proxyImageTag: "latest"
