@@ -4,9 +4,9 @@ metadata:
   name: "sso-golang-http"
   namespace: jx-staging
 spec:
-  oidcIssuerUrl: "https://dex.jx-staging.jx.cosmin.rawlings.it"
+  oidcIssuerUrl: "https://dex.jx-staging.exmaple.com"
   upstreamService: "golang-http"
-  domain: "jx.cosmin.rawlings.it"
+  domain: "exmaple.com"
   certIssuerName: "letsencrypt-prod"
   cookieSpec:
     name: "sso-golang-http"

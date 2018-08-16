@@ -4,21 +4,30 @@ Single Sign-On Kubernetes [operator](https://coreos.com/operators/) for [dex](ht
 
 ## Prerequisites
 
-The operator requires the [dex](https://github.com/coreos/dex) identity provider, which could be installed into your cluster using this [helm chart](https://github.com/jenkins-x/dex/tree/master/charts/dex).
-The chart will also install [cert-manager](https://github.com/jetstack/cert-manager), that will issue the gRPC client certificate for `sso-operator`.
+The operator requires the [dex](https://github.com/coreos/dex) identity provider and the [cert-manager](https://github.com/jetstack/cert-manager) to be installed into the cluter. 
+You can install them using this [helm chart](https://github.com/jenkins-x/dex/tree/master/charts/dex), which pre-configures the `GitHub connector`, and uses  the `cert-manager` to issue certificates for dex gRPC API.
 
-Before starting the installation, you have to create a [GitHub OAuth App](https://github.com/settings/applications/new) which has the `callback` *https://DEX_DOMAIN/callback*.
+Before starting the installation, you have to create a [GitHub OAuth App](https://github.com/settings/applications/new) which has as `callback` *https://DEX_DOMAIN/callback* URL.
 
+Now you can proceed with the installation as follows:
 ```
 helm upgrade -i --namespace <NAMESAPCE> --wait --timeout 600 dex \
-         --set issuer="<https://<DEX_DOMAIN>" \
-         --set connectors.github.config.clientID="<CLIENT_ID>" \
+         --set domain="<DEX_DOMAIN>" \
+         --set connectors.github.config.clientID="<CLIENT_ID>" \ 
          --set connectors.github.config.clientSecret="<CLIENT_SECRET>" \
-         --set connectors.github.config.orgs="<GITHUB_ORG>" \
+         --set connectors.github.config.orgs={ORG1,ORG2} \
          .
 ```
 
-Also the `dex` service will have to be publicly exposed using an ingress controller of your choice.
+The web endpoint of dex has to be publicly exposed and secured with TLS. You can do  this pretty easy, if you have the [Jenkins X](https://jenkins-x.io/) installed into your cluster.
+
+By executing the command:
+
+```
+jx upgrade ingress 
+```
+
+You can select TLS and provide your `DEX_DOMAIN` and email. This command will configure the ingress controller to fetch automatically the TLS certificate from a Let's Encrypt CA server.
 
 ## Installation
 
@@ -49,7 +58,7 @@ make install-helm
 
 ## Enable SSO
 
-After installing the operator, you can enable Single Sign-On for a Kubernetes service by creating a SSO custom resource. 
+After installing the operator, you can enable Single Sign-On for any Kubernetes service by creating a SSO custom resource. 
 
 Let's start by creating a basic Go http service with Jenkins X:
 
@@ -77,10 +86,16 @@ metadata:
   name: "sso-golang-http"
   namespace: jx-staging
 spec:
-  oidcIssuerUrl: "<DEX_URL>"
+  oidcIssuerUrl: "https://dex.jx-staging.example.com"
   upstreamService: "golang-http"
-  domain: "<SSO_DOMAIN>"
-  tls: false
+  domain: "example.com"
+  certIssuerName: "letsencrypt-prod"
+  cookieSpec:
+    name: "sso-golang-http"
+    expire: "168h"
+    refresh: "60m"
+    secure: true
+    httpOnly: true
   proxyImage: "cosmincojocar/oauth2_proxy"
   proxyImageTag: "latest"
   proxyResources:
@@ -90,23 +105,17 @@ spec:
     requests:
       cpu: 80m
       memory: 128Mi
-  cookieSpec:
-    name: "sso-golang-http"
-    expire: "168h"
-    refresh: "60m"
-    secure: false
-    httpOnly: true
 EOF
 ```
 
-__Note:__ You will have to update *DEX_URL* and *SSO_DOMAIN* with your specific values.
+__Note:__ You will have to update *oidcIssuerUrl* and *domain* with your specific values.
 
-A SSO proxy will be automatically created by the operator and publicly exposed under your domain. You can see the proxy URL with:
+A SSO proxy will be automatically created by the operator and publicly exposed under your domain with TLS enabled. You can see the proxy URL with:
 
 ```
 kubectl get ingress -n jx-staging
-NAME           HOSTS                                                                     ADDRESS          PORTS     AGE
-golang-http    golang-http.jx-staging.35.187.37.181.nip.io                               35.240.115.197   80        1m
+NAME              HOSTS                                                             ADDRESS        PORTS     AGE
+sso-golang-http   sso-golang-http.jx-staging.example.com                            104.155.7.81   80, 443   37m
 ```
 
-You can open now the URL in a browser and check if Single Sign-On works.
+You can open now the `https://sso-golang-http.jx-staging.example.com` URL in a browser and check if Single Sign-On works with your GitHub user.
