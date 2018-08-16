@@ -37,6 +37,12 @@ const (
 	createTimeout       = time.Duration(60 * time.Second)
 	createIntervalCheck = time.Duration(10 * time.Second)
 	readyTimeout        = time.Duration(5 * time.Minute)
+
+	exposeAnnotation        = "fabric8.io/expose"
+	exposeIngressAnnotation = "fabric8.io/ingress.annotations"
+	ingressClassAnnotations = "kubernetes.io/ingress.class"
+	certManagerAnnotation   = "certmanager.k8s.io/issuer"
+	ingressClass            = "nginx"
 )
 
 // Proxy keeps the k8s resources created for a proxy
@@ -72,6 +78,13 @@ func buildName(name string, namespace string) string {
 
 func labels(sso *apiv1.SSO) map[string]string {
 	return map[string]string{"app": sso.Spec.UpstreamService, "sso": sso.GetName()}
+}
+
+func serviceAnnotations(sso *apiv1.SSO) map[string]string {
+	return map[string]string{
+		exposeAnnotation:        "true",
+		exposeIngressAnnotation: ingressClassAnnotations + ": " + ingressClass + "\n" + certManagerAnnotation + ": " + sso.Spec.CertIssuerName,
+	}
 }
 
 // Deploy deploys the oauth2 proxy
@@ -140,10 +153,6 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
 		return nil, errors.Wrap(err, "creating oauth2_proxy deployment")
 	}
 
-	annotations := map[string]string{
-		"fabric8.io/expose":              "true",
-		"fabric8.io/ingress.annotations": "kubernetes.io/ingress.class: nginx",
-	}
 	service := sso.GetName()
 	svc := &v1.Service{
 		TypeMeta: metav1.TypeMeta{
@@ -154,7 +163,7 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
 			Name:        service,
 			Namespace:   ns,
 			Labels:      labels(sso),
-			Annotations: annotations,
+			Annotations: serviceAnnotations(sso),
 		},
 		Spec: v1.ServiceSpec{
 			Ports: []v1.ServicePort{{

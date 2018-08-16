@@ -7,7 +7,13 @@ spec:
   oidcIssuerUrl: "https://dex.jx-staging.jx.cosmin.rawlings.it"
   upstreamService: "golang-http"
   domain: "jx.cosmin.rawlings.it"
-  tls: false
+  certIssuerName: "letsencrypt-prod"
+  cookieSpec:
+    name: "sso-golang-http"
+    expire: "168h"
+    refresh: "60m"
+    secure: true
+    httpOnly: true
   proxyImage: "cosmincojocar/oauth2_proxy"
   proxyImageTag: "latest"
   proxyResources:
@@ -17,9 +23,3 @@ spec:
     requests:
       cpu: 80m
       memory: 128Mi
-  cookieSpec:
-    name: "sso-golang-http"
-    expire: "168h"
-    refresh: "60m"
-    secure: false
-    httpOnly: true
