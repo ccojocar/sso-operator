@@ -30,6 +30,9 @@ readinessProbe:
   timeoutSeconds: 1
 terminationGracePeriodSeconds: 10
 
+watch:
+  namespace: "" # if the namespace is empty, it will watch the entire cluster
+
 dex:
   grpcHostAndPort: dex:5000 
   certs:

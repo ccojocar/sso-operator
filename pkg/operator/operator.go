@@ -13,17 +13,17 @@ import (
 )
 
 // NewHandler returns a new SSO operator event handler
-func NewHandler(dexClient *dex.Client, exposeServiceAccount string) sdk.Handler {
+func NewHandler(dexClient *dex.Client, clusterRoleName string) sdk.Handler {
 	return &Handler{
-		dexClient:            dexClient,
-		exposeServiceAccount: exposeServiceAccount,
+		dexClient:       dexClient,
+		clusterRoleName: clusterRoleName,
 	}
 }
 
 // Handler is a SSO operator event handler
 type Handler struct {
-	dexClient            *dex.Client
-	exposeServiceAccount string
+	dexClient       *dex.Client
+	clusterRoleName string
 }
 
 // Handle handles SSO operator events
@@ -32,9 +32,16 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 	case *v1.SSO:
 		sso := o.DeepCopy()
 
+		// Ensure that the operator has permissions in the namespace of the single sing-on resource
+		saName, err := kubernetes.EnsureClusterRoleBinding(h.clusterRoleName, sso.GetNamespace())
+		if err != nil {
+			return errors.Wrapf(err, "ensuring cluster role '%s' has a binding to a service account in the namespace '%s'",
+				h.clusterRoleName, sso.GetNamespace())
+		}
+
 		// Cleanup all resources when a SSO CR is deleted
 		if event.Deleted && sso.Status.Initialized {
-			err := proxy.Cleanup(sso, sso.GetName(), h.exposeServiceAccount)
+			err := proxy.Cleanup(sso, sso.GetName(), saName)
 			if err != nil {
 				return errors.Wrapf(err, "cleaning up '%s' SSO proxy", sso.GetName())
 			}
@@ -72,7 +79,7 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		}
 
 		// Expose the OIDC proxy service publicly
-		err = proxy.Expose(sso, proxyResources.Service.GetName(), h.exposeServiceAccount)
+		err = proxy.Expose(sso, proxyResources.Service.GetName(), saName)
 		if err != nil {
 			return errors.Wrapf(err, "exposing '%s' SSO proxy", sso.GetName())
 		}
