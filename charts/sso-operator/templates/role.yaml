@@ -36,6 +36,9 @@ rules:
   - secrets
   - services
   - pods
+  - srviceaccounts
+  - clusterroles
+  - clusterrolebindings 
   verbs:
   - get
   - list
