@@ -36,9 +36,6 @@ rules:
   - secrets
   - services
   - pods
-  - srviceaccounts
-  - clusterroles
-  - clusterrolebindings 
   verbs:
   - get
   - list
@@ -47,6 +44,13 @@ rules:
   - delete
   - watch
   - patch
+- apiGroups:
+  - ""
+  resources:
+  - srviceaccounts
+  verbs:
+  - get
+  - create
 - apiGroups:
   - extensions
   - apps
@@ -83,3 +87,12 @@ rules:
   - create
   - update
   - delete
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - clusterroles
+  - clusterrolebindings 
+  verbs:
+  - get
+  - list
+  - update
