@@ -24,6 +24,9 @@ func EnsureClusterRoleBinding(clusterRoleName string, namespace string) (string,
 	}
 
 	roleBindingList, err := k8sClient.RbacV1().ClusterRoleBindings().List(metav1.ListOptions{})
+	if err != nil {
+		return "", errors.Wrap(err, "listing cluster role bindings")
+	}
 	for _, roleBinding := range roleBindingList.Items {
 		roleRef := roleBinding.RoleRef
 		if roleRef.Kind == roleKind && roleRef.Name == clusterRoleName {
