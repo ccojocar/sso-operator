@@ -26,7 +26,7 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["/sso-operator"]
         args:
-        - "--dex-grpc-host-port={{ .Values.dex.grpcHostAndPort }}"
+        - "--dex-grpc-host-port={{ .Values.dex.grpcHost }}:{{ .Values.dex.grpcPort }}"
         - "--dex-grpc-client-crt=/etc/dex/tls/tls.crt"
         - "--dex-grpc-client-key=/etc/dex/tls/tls.key"
         - "--cluster-role-name={{ $roleName }}"

@@ -34,7 +34,8 @@ watch:
   namespace: "" # if the namespace is empty, it will watch the entire cluster
 
 dex:
-  grpcHostAndPort: dex.sso:5000 
+  grpcHost: dex.sso
+  grpcPort: 5000 
   certs:
     grpc:
       issuer:

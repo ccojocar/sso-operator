@@ -13,4 +13,4 @@ spec:
     kind: ClusterIssuer
   commonName: dex-grpc-client
   dnsName:
-  - dex
+  - {{ .Values.dex.grpcHost }}
