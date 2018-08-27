@@ -26,7 +26,7 @@ func EnsureClusterRoleBinding(clusterRoleName string, namespace string) (string,
 	roleBindingList, err := k8sClient.RbacV1().ClusterRoleBindings().List(metav1.ListOptions{})
 	for _, roleBinding := range roleBindingList.Items {
 		roleRef := roleBinding.RoleRef
-		if roleRef.Kind == roleKind && roleRef.Name == roleKind {
+		if roleRef.Kind == roleKind && roleRef.Name == clusterRoleName {
 			// Check if there is already a service account assigned to the operator cluster role in the given namespace
 			for _, subj := range roleBinding.Subjects {
 				if subj.Kind == subjectKind && subj.Namespace == namespace {
