@@ -23,18 +23,22 @@ const port = "8080"
 
 // OperatorOptions holds the command options for SSO operator
 type OperatorOptions struct {
-	Namespace            string
-	DexGrpcHostAndPort   string
-	DexGrpcClientCrt     string
-	DexGrpcClientKey     string
-	ExposeServiceAccount string
+	Namespace          string
+	DexGrpcHostAndPort string
+	DexGrpcClientCrt   string
+	DexGrpcClientKey   string
+	ClusterRoleName    string
 }
 
 func printVersion(namespace string) {
 	logrus.Infof("Go Version: %s", runtime.Version())
 	logrus.Infof("Go OS/Arch: %s/%s", runtime.GOOS, runtime.GOARCH)
 	logrus.Infof("operator-sdk Version: %v", sdkVersion.Version)
-	logrus.Infof("operator namespace: %s", namespace)
+	if namespace == "" {
+		logrus.Info("operator watching entire cluster")
+	} else {
+		logrus.Infof("operator watching namespace: %s", namespace)
+	}
 }
 
 func handleLiveness() {
@@ -85,7 +89,7 @@ func (o *OperatorOptions) Run() {
 
 	// configure the operator
 	sdk.Watch("jenkins.io/v1", "SSO", ns, 5)
-	sdk.Handle(operator.NewHandler(dexClient, o.ExposeServiceAccount))
+	sdk.Handle(operator.NewHandler(dexClient, o.ClusterRoleName))
 
 	// start the health probe
 	go handleLiveness()
@@ -120,11 +124,11 @@ func commandRoot() *cobra.Command {
 		},
 	}
 
-	rootCmd.Flags().StringVarP(&options.Namespace, "namespace", "n", "", "Namespace where the operator will watch for resources")
+	rootCmd.Flags().StringVarP(&options.Namespace, "namespace", "n", "", "Namespace where the operator will watch for resources (leave empty to watch the entire cluster)")
 	rootCmd.Flags().StringVarP(&options.DexGrpcHostAndPort, "dex-grpc-host-port", "", "", "Host and port of Dex gRPC server")
 	rootCmd.Flags().StringVarP(&options.DexGrpcClientCrt, "dex-grpc-client-crt", "", "", "Certificate for Dex gRPC client")
 	rootCmd.Flags().StringVarP(&options.DexGrpcClientKey, "dex-grpc-client-key", "", "", "Key for Dex gRPC client")
-	rootCmd.Flags().StringVarP(&options.ExposeServiceAccount, "expose-sa", "", "default", "Service account for exposecontroller")
+	rootCmd.Flags().StringVarP(&options.ClusterRoleName, "cluster-role-name", "", "", "Cluster role name which has the required permissions for operator")
 
 	return rootCmd
 }

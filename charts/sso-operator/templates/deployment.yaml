@@ -1,4 +1,5 @@
 {{ $serviceAccount := include "fullname" . }}
+{{ $roleName := include "fullname" . }}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -28,10 +29,10 @@ spec:
         - "--dex-grpc-host-port={{ .Values.dex.grpcHostAndPort }}"
         - "--dex-grpc-client-crt=/etc/dex/tls/tls.crt"
         - "--dex-grpc-client-key=/etc/dex/tls/tls.key"
-        - "--expose-sa={{ $serviceAccount }}"
+        - "--cluster-role-name={{ $roleName }}"
         env:
           - name: OPERATOR_NAMESPACE
-            value: {{ .Release.Namespace }}
+            value: {{ .Values.watch.namespace }}
         volumeMounts:
           - name: dex-grpc-client-cert
             mountPath: /etc/dex/tls
