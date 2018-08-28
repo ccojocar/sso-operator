@@ -356,6 +356,7 @@ func proxyConfig(sso *apiv1.SSO, client *api.Client) (string, error) {
 		LoginURL:      fmt.Sprintf("%s/auth", issuerURL),
 		RedeemURL:     fmt.Sprintf("%s/token", issuerURL),
 		Upstream:      upstreamURL,
+		ForwardToken:  sso.Spec.ForwardToken,
 		Cookie: Cookie{
 			Name:     sso.Spec.CookieSpec.Name,
 			Secret:   cookieSecret,

@@ -16,6 +16,7 @@ func TestProxyConfig(t *testing.T) {
 		LoginURL:      "http://test-proxy/auth",
 		RedeemURL:     "http://test-proxy/token",
 		Upstream:      "http://test-upstream",
+		ForwardToken:  false,
 		Cookie: Cookie{
 			Name:     "test-cookie",
 			Secret:   "test",

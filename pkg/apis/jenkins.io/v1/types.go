@@ -38,6 +38,8 @@ type SSOSpec struct {
 	ProxyImageTag string `json:"proxyImageTag,omitempty"`
 	// Resource requirements for oauth2_proxy pod
 	ProxyResources v1.ResourceRequirements `json:"proxyResources,omitempty"`
+	// Indicate if the access token should be forwarded to the upstream service
+	ForwardToken bool `json:"forwardToken,omitempty"`
 	// CookieSpec cookie specifications
 	CookieSpec CookieSpec `json:"cookieSpec,omitempty"`
 }
