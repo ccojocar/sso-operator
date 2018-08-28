@@ -30,7 +30,8 @@ type Config struct {
 	LoginURL      string
 	RedeemURL     string
 
-	Upstream string
+	Upstream     string
+	ForwardToken bool
 
 	Cookie Cookie
 }
@@ -61,6 +62,7 @@ client_secret = "{{.ClientSecret}}"
 ## Pass OAuth Access token to upstream via "X-Forwarded-Access-Token"
 pass_basic_auth = false
 pass_host_header = false
+pass_access_token = {{.ForwardToken}}
 
 ## Email Domains to allow authentication for (this authorizes any email on this domain)
 email_domains = [
