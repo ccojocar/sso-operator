@@ -1,0 +1,5 @@
++ make tag
+sed -i -e "s/version:.*/version: 1.0.2/" Chart.yaml
+sed -i -e "s|repository: .*|repository: 10.23.246.178:5000\/jenkins-x\/sso-operator|" values.yaml
+sed -i -e "s/tag: .*/tag: 1.0.2/" values.yaml
+git add --all
