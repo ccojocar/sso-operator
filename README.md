@@ -88,6 +88,7 @@ metadata:
 spec:
   oidcIssuerUrl: "https://dex.jx-staging.example.com"
   upstreamService: "golang-http"
+  forwardToken: false
   domain: "example.com"
   certIssuerName: "letsencrypt-prod"
   cookieSpec:
