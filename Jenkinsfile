@@ -3,6 +3,7 @@ pipeline {
         label "jenkins-go"
     }
     environment {
+      DOCKER_REGISTRY   = 'docker.io'
       ORG               = 'jenkinsxio'
       APP_NAME          = 'sso-operator'
       GIT_PROVIDER      = 'github.com'
