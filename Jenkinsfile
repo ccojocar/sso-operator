@@ -3,7 +3,7 @@ pipeline {
         label "jenkins-go"
     }
     environment {
-      ORG               = 'jenkins-x'
+      ORG               = 'jenkinsxio'
       APP_NAME          = 'sso-operator'
       GIT_PROVIDER      = 'github.com'
       CHARTMUSEUM_CREDS = credentials('jenkins-x-chartmuseum')
@@ -41,6 +41,9 @@ pipeline {
         }
       }
       stage('Build Release') {
+        environment {
+          CHARTMUSEUM_CREDS = credentials('jenkins-x-chartmuseum')
+        }
         when {
           branch 'master'
         }
@@ -61,37 +64,17 @@ pipeline {
               // so we can retrieve the version in later steps
               sh "echo \$(jx-release-version) > VERSION"
             }
-            dir ('/home/jenkins/go/src/github.com/jenkins-x/sso-operator/charts/sso-operator') {
-              sh "make tag"
-            }
             dir ('/home/jenkins/go/src/github.com/jenkins-x/sso-operator') {
               container('go') {
                 sh "make all"
                 sh 'export VERSION=`cat VERSION` && skaffold build -f skaffold.yaml'
 
+                sh "jx step tag --version \$(cat VERSION)"
                 sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:\$(cat VERSION)"
               }
             }
-          }
-        }
-      }
-      stage('Promote to Environments') {
-        when {
-          branch 'master'
-        }
-        steps {
-          dir ('/home/jenkins/go/src/github.com/jenkins-x/sso-operator/charts/sso-operator') {
-            container('go') {
-              sh 'jx step changelog --version v\$(cat ../../VERSION)'
-
-              // release the helm chart
-              sh 'jx step helm release'
-
-              // promote through all 'Auto' promotion Environments
-              sh 'jx promote -b --all-auto --timeout 1h --version \$(cat ../../VERSION)'
-
-              // verify if the application was properly promoted
-              sh 'jx step verify --pods=1 --after=90 --restarts=0'
+            dir ('/home/jenkins/go/src/github.com/jenkins-x/sso-operator/charts/sso-operator') {
+              sh "make release"
             }
           }
         }
