@@ -42,6 +42,7 @@ const (
 
 	exposeAnnotation        = "fabric8.io/expose"
 	exposeIngressAnnotation = "fabric8.io/ingress.annotations"
+	ingressNameAnnotation   = "fabric8.io/ingress.name"
 	ingressClassAnnotations = "kubernetes.io/ingress.class"
 	certManagerAnnotation   = "certmanager.k8s.io/issuer"
 	ingressClass            = "nginx"
@@ -83,9 +84,10 @@ func labels(sso *apiv1.SSO, appName string) map[string]string {
 	return map[string]string{"app": appName, "sso": sso.GetName()}
 }
 
-func serviceAnnotations(sso *apiv1.SSO) map[string]string {
+func serviceAnnotations(sso *apiv1.SSO, appName string) map[string]string {
 	return map[string]string{
 		exposeAnnotation:        "true",
+		ingressNameAnnotation:   appName,
 		exposeIngressAnnotation: ingressClassAnnotations + ": " + ingressClass + "\n" + certManagerAnnotation + ": " + sso.Spec.CertIssuerName,
 	}
 }
@@ -170,7 +172,7 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
 			Name:        service,
 			Namespace:   ns,
 			Labels:      labels(sso, appName),
-			Annotations: serviceAnnotations(sso),
+			Annotations: serviceAnnotations(sso, appName),
 		},
 		Spec: v1.ServiceSpec{
 			Ports: []v1.ServicePort{{
