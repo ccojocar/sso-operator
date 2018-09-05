@@ -85,7 +85,7 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		}
 
 		// Update in dex the redirect URL of the OIDC client
-		ingressHosts, err := kubernetes.FindIngressHosts(sso.GetName(), sso.GetNamespace())
+		ingressHosts, err := kubernetes.FindIngressHosts(proxyResources.AppName, sso.GetNamespace())
 		if err != nil {
 			return errors.Wrap(err, "searching ingress hosts")
 		}

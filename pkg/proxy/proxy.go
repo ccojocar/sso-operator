@@ -37,6 +37,8 @@ const (
 	createTimeout       = time.Duration(60 * time.Second)
 	createIntervalCheck = time.Duration(10 * time.Second)
 	readyTimeout        = time.Duration(5 * time.Minute)
+	appLabel            = "app"
+	releaseLabel        = "release"
 
 	exposeAnnotation        = "fabric8.io/expose"
 	exposeIngressAnnotation = "fabric8.io/ingress.annotations"
@@ -47,6 +49,7 @@ const (
 
 // Proxy keeps the k8s resources created for a proxy
 type Proxy struct {
+	AppName    string
 	Secret     *v1.Secret
 	Deployment *appsv1.Deployment
 	Service    *v1.Service
@@ -76,8 +79,8 @@ func buildName(name string, namespace string) string {
 	return fmt.Sprintf("%s-%s", namespace, name)
 }
 
-func labels(sso *apiv1.SSO) map[string]string {
-	return map[string]string{"app": sso.Spec.UpstreamService, "sso": sso.GetName()}
+func labels(sso *apiv1.SSO, appName string) map[string]string {
+	return map[string]string{"app": appName, "sso": sso.GetName()}
 }
 
 func serviceAnnotations(sso *apiv1.SSO) map[string]string {
@@ -89,7 +92,11 @@ func serviceAnnotations(sso *apiv1.SSO) map[string]string {
 
 // Deploy deploys the oauth2 proxy
 func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
-	secret, err := proxySecret(sso, oidcClient, labels(sso))
+	appName, err := getAppName(sso.Spec.UpstreamService, sso.GetNamespace())
+	if err != nil {
+		return nil, errors.Wrap(err, "gettting the app name from upstream service labels")
+	}
+	secret, err := proxySecret(sso, oidcClient, labels(sso, appName))
 	if err != nil {
 		return nil, errors.Wrap(err, "creating oauth2_proxy config")
 	}
@@ -105,7 +112,7 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      buildName(sso.GetName(), sso.GetNamespace()),
 			Namespace: ns,
-			Labels:    labels(sso),
+			Labels:    labels(sso, appName),
 		},
 		Spec: v1.PodSpec{
 			Containers: []v1.Container{proxyContainer(sso, secretVersion)},
@@ -130,11 +137,11 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      deployment,
 			Namespace: ns,
-			Labels:    labels(sso),
+			Labels:    labels(sso, appName),
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: &replicas,
-			Selector: &metav1.LabelSelector{MatchLabels: labels(sso)},
+			Selector: &metav1.LabelSelector{MatchLabels: labels(sso, appName)},
 			Template: podTempl,
 			Strategy: appsv1.DeploymentStrategy{
 				Type: appsv1.RollingUpdateDeploymentStrategyType,
@@ -162,7 +169,7 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        service,
 			Namespace:   ns,
-			Labels:      labels(sso),
+			Labels:      labels(sso, appName),
 			Annotations: serviceAnnotations(sso),
 		},
 		Spec: v1.ServiceSpec{
@@ -172,7 +179,7 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
 				Port:       publicPort,
 				TargetPort: intstr.FromInt(port),
 			}},
-			Selector: labels(sso),
+			Selector: labels(sso, appName),
 		},
 	}
 
@@ -201,6 +208,7 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
 	}
 
 	return &Proxy{
+		AppName:    appName,
 		Secret:     secret,
 		Deployment: d,
 		Service:    svc,
@@ -448,6 +456,41 @@ func getUpstreamURL(upstreamService string, namespace string) (string, error) {
 		if service.GetName() == upstreamService {
 			port := service.Spec.Ports[0].Port
 			return fmt.Sprintf("http://%s:%d", service.Name, port), nil
+		}
+	}
+	return "", fmt.Errorf("no service '%s' found in namespace '%s'", upstreamService, namespace)
+}
+
+func getAppName(upstreamService string, namespace string) (string, error) {
+	kubeClient, err := kubernetes.GetClientset()
+	if err != nil {
+		return "", errors.Wrap(err, "creating k8s client")
+	}
+	serviceList, err := kubeClient.CoreV1().Services(namespace).List(metav1.ListOptions{})
+	if err != nil {
+		return "", errors.Wrapf(err, "listing services in namespace '%s'", namespace)
+	}
+	for _, service := range serviceList.Items {
+		if service.GetName() == upstreamService {
+			labels := service.ObjectMeta.GetLabels()
+			appLabelValue := ""
+			releaseLabelValue := ""
+			for name, value := range labels {
+				if name == appLabel {
+					appLabelValue = value
+					break
+				}
+				if name == releaseLabel {
+					releaseLabelValue = value
+				}
+			}
+			if appLabelValue != "" {
+				return appLabelValue, nil
+			}
+			if releaseLabelValue != "" {
+				return strings.Replace(service.Name, releaseLabelValue+"-", "", 1), nil
+			}
+			return service.Name, nil
 		}
 	}
 	return "", fmt.Errorf("no service '%s' found in namespace '%s'", upstreamService, namespace)
