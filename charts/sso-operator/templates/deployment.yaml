@@ -32,6 +32,8 @@ spec:
         - "--cluster-role-name={{ $roleName }}"
         env:
           - name: OPERATOR_NAMESPACE
+            value: {{ .Release.Namespace }}
+          - name: WATCH_NAMESPACE
             value: {{ .Values.watch.namespace }}
         volumeMounts:
           - name: dex-grpc-client-cert
