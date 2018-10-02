@@ -13,17 +13,23 @@ import (
 )
 
 // NewHandler returns a new SSO operator event handler
-func NewHandler(dexClient *dex.Client, clusterRoleName string) sdk.Handler {
+func NewHandler(dexClient *dex.Client, clusterRoleName string) (sdk.Handler, error) {
+	ssoCookieKey, err := proxy.GenerateCookieKey()
+	if err != nil {
+		return nil, err
+	}
 	return &Handler{
 		dexClient:       dexClient,
 		clusterRoleName: clusterRoleName,
-	}
+		ssoCookieKey:    ssoCookieKey,
+	}, nil
 }
 
 // Handler is a SSO operator event handler
 type Handler struct {
 	dexClient       *dex.Client
 	clusterRoleName string
+	ssoCookieKey    string
 }
 
 // Handle handles SSO operator events
@@ -73,7 +79,7 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		}
 
 		// Deploy the OIDC proxy
-		proxyResources, err := proxy.Deploy(sso, client)
+		proxyResources, err := proxy.Deploy(sso, client, h.ssoCookieKey)
 		if err != nil {
 			return errors.Wrapf(err, "deploying '%s' SSO proxy", sso.GetName())
 		}
@@ -97,7 +103,7 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		client.RedirectUris = redirectURLs
 
 		// Update the OIDC proxy
-		err = proxy.Update(proxyResources, sso, client)
+		err = proxy.Update(proxyResources, sso, client, h.ssoCookieKey)
 		if err != nil {
 			return errors.Wrapf(err, "updating '%s' SSO proxy", sso.GetName())
 		}

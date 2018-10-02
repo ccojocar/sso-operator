@@ -89,7 +89,12 @@ func (o *OperatorOptions) Run() {
 
 	// configure the operator
 	sdk.Watch("jenkins.io/v1", "SSO", ns, 5)
-	sdk.Handle(operator.NewHandler(dexClient, o.ClusterRoleName))
+	handler, err := operator.NewHandler(dexClient, o.ClusterRoleName)
+	if err != nil {
+		logrus.Errorf("failed to create the operator handler: %v", err)
+		os.Exit(2)
+	}
+	sdk.Handle(handler)
 
 	// start the health probe
 	go handleLiveness()

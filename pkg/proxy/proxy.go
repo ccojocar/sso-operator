@@ -93,12 +93,12 @@ func serviceAnnotations(sso *apiv1.SSO, appName string) map[string]string {
 }
 
 // Deploy deploys the oauth2 proxy
-func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
+func Deploy(sso *apiv1.SSO, oidcClient *api.Client, cookieSecret string) (*Proxy, error) {
 	appName, err := getAppName(sso.Spec.UpstreamService, sso.GetNamespace())
 	if err != nil {
 		return nil, errors.Wrap(err, "gettting the app name from upstream service labels")
 	}
-	secret, err := proxySecret(sso, oidcClient, labels(sso, appName))
+	secret, err := proxySecret(sso, oidcClient, cookieSecret, labels(sso, appName))
 	if err != nil {
 		return nil, errors.Wrap(err, "creating oauth2_proxy config")
 	}
@@ -218,8 +218,8 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client) (*Proxy, error) {
 }
 
 // Update updates the oauth2_proxy secret and deployment
-func Update(proxy *Proxy, sso *apiv1.SSO, client *api.Client) error {
-	err := updateProxySecret(proxy.Secret, sso, client)
+func Update(proxy *Proxy, sso *apiv1.SSO, client *api.Client, cookieSecret string) error {
+	err := updateProxySecret(proxy.Secret, sso, client, cookieSecret)
 	if err != nil {
 		return errors.Wrap(err, "updating oauth2_proxy secret")
 	}
@@ -340,11 +340,7 @@ func proxyContainer(sso *apiv1.SSO, secretVersion string) v1.Container {
 	}
 }
 
-func proxyConfig(sso *apiv1.SSO, client *api.Client) (string, error) {
-	cookieSecret, err := generateSecret(cookieSecretLen)
-	if err != nil {
-		return "", errors.Wrap(err, "generating cookie secret")
-	}
+func proxyConfig(sso *apiv1.SSO, client *api.Client, cookieSecret string) (string, error) {
 	upstreamURL, err := getUpstreamURL(sso.Spec.UpstreamService, sso.Namespace)
 	if err != nil {
 		return "", errors.Wrap(err, "getting the upstream service URL")
@@ -385,8 +381,8 @@ func proxyConfig(sso *apiv1.SSO, client *api.Client) (string, error) {
 	return config, nil
 }
 
-func updateProxySecret(secret *v1.Secret, sso *apiv1.SSO, client *api.Client) error {
-	config, err := proxyConfig(sso, client)
+func updateProxySecret(secret *v1.Secret, sso *apiv1.SSO, client *api.Client, cookieSecret string) error {
+	config, err := proxyConfig(sso, client, cookieSecret)
 	if err != nil {
 		return errors.Wrap(err, "creating oauth2_proxy config")
 	}
@@ -400,8 +396,8 @@ func updateProxySecret(secret *v1.Secret, sso *apiv1.SSO, client *api.Client) er
 	return nil
 }
 
-func proxySecret(sso *apiv1.SSO, client *api.Client, labels map[string]string) (*v1.Secret, error) {
-	config, err := proxyConfig(sso, client)
+func proxySecret(sso *apiv1.SSO, client *api.Client, cookieSecret string, labels map[string]string) (*v1.Secret, error) {
+	config, err := proxyConfig(sso, client, cookieSecret)
 	if err != nil {
 		return nil, errors.Wrap(err, "creating oauth2_proxy config")
 	}
@@ -421,6 +417,11 @@ func proxySecret(sso *apiv1.SSO, client *api.Client, labels map[string]string) (
 		Type: v1.SecretTypeOpaque,
 	}
 	return secret, nil
+}
+
+// GenerateCookieKey generates a random key which used to sign the SSO cookie
+func GenerateCookieKey() (string, error) {
+	return generateSecret(cookieSecretLen)
 }
 
 func generateSecret(size int) (string, error) {
