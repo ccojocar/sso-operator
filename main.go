@@ -18,26 +18,31 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const operatorNamespace = "OPERATOR_NAMESPACE"
-const port = "8080"
+const (
+	watchNamespaceEnv    = "WATCH_NAMESPACE"
+	operatorNamespaceEnv = "OPERATOR_NAMESPACE"
+	port                 = "8080"
+)
 
 // OperatorOptions holds the command options for SSO operator
 type OperatorOptions struct {
 	Namespace          string
+	WatchNamespace     string
 	DexGrpcHostAndPort string
 	DexGrpcClientCrt   string
 	DexGrpcClientKey   string
 	ClusterRoleName    string
 }
 
-func printVersion(namespace string) {
+func printVersion(namespace string, watchNamespace string) {
 	logrus.Infof("Go Version: %s", runtime.Version())
 	logrus.Infof("Go OS/Arch: %s/%s", runtime.GOOS, runtime.GOARCH)
 	logrus.Infof("operator-sdk Version: %v", sdkVersion.Version)
-	if namespace == "" {
+	logrus.Infof("operator namespace: %s", namespace)
+	if watchNamespace == "" {
 		logrus.Info("operator watching entire cluster")
 	} else {
-		logrus.Infof("operator watching namespace: %s", namespace)
+		logrus.Infof("operator watching namespace: %s", watchNamespace)
 	}
 }
 
@@ -54,11 +59,15 @@ func handleLiveness() {
 
 // Run starts the SSO operator
 func (o *OperatorOptions) Run() {
-	ns := o.Namespace
-	if ns == "" {
-		ns = os.Getenv(operatorNamespace)
+	namespace := o.Namespace
+	if namespace == "" {
+		namespace = os.Getenv(operatorNamespaceEnv)
 	}
-	printVersion(ns)
+	watchNamespace := o.WatchNamespace
+	if watchNamespace == "" {
+		watchNamespace = os.Getenv(watchNamespaceEnv)
+	}
+	printVersion(namespace, watchNamespace)
 
 	// validate the command line options
 	err := o.Validate()
@@ -88,7 +97,7 @@ func (o *OperatorOptions) Run() {
 	}
 
 	// configure the operator
-	sdk.Watch("jenkins.io/v1", "SSO", ns, 5)
+	sdk.Watch("jenkins.io/v1", "SSO", watchNamespace, 5)
 	handler, err := operator.NewHandler(dexClient, o.ClusterRoleName)
 	if err != nil {
 		logrus.Errorf("failed to create the operator handler: %v", err)
@@ -129,7 +138,8 @@ func commandRoot() *cobra.Command {
 		},
 	}
 
-	rootCmd.Flags().StringVarP(&options.Namespace, "namespace", "n", "", "Namespace where the operator will watch for resources (leave empty to watch the entire cluster)")
+	rootCmd.Flags().StringVarP(&options.Namespace, "namespace", "n", "", "Namespace where the operator where the operator is deployed")
+	rootCmd.Flags().StringVarP(&options.WatchNamespace, "watch-namespace", "", "", "Namespace where the operator will watch for resources (leave empty to watch the entire cluster)")
 	rootCmd.Flags().StringVarP(&options.DexGrpcHostAndPort, "dex-grpc-host-port", "", "", "Host and port of Dex gRPC server")
 	rootCmd.Flags().StringVarP(&options.DexGrpcClientCrt, "dex-grpc-client-crt", "", "", "Certificate for Dex gRPC client")
 	rootCmd.Flags().StringVarP(&options.DexGrpcClientKey, "dex-grpc-client-key", "", "", "Key for Dex gRPC client")
