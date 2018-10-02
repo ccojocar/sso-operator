@@ -13,15 +13,25 @@ import (
 )
 
 // NewHandler returns a new SSO operator event handler
-func NewHandler(dexClient *dex.Client, clusterRoleName string) (sdk.Handler, error) {
-	ssoCookieKey, err := proxy.GenerateCookieKey()
+func NewHandler(dexClient *dex.Client, namespace string, clusterRoleName string) (sdk.Handler, error) {
+	config, err := getOperatorConfigFromSecret(namespace)
 	if err != nil {
-		return nil, err
+		ssoCookieKey, err := proxy.GenerateCookieKey()
+		if err != nil {
+			return nil, errors.Wrap(err, "generating the sso cookie key")
+		}
+		config = &operatorConfig{
+			ssoCookieKey: ssoCookieKey,
+		}
+		err = storeOperatorConfigInSecret(namespace, config)
+		if err != nil {
+			return nil, errors.Wrap(err, "storing the operator config in a secret")
+		}
 	}
 	return &Handler{
 		dexClient:       dexClient,
 		clusterRoleName: clusterRoleName,
-		ssoCookieKey:    ssoCookieKey,
+		operatorConfig:  *config,
 	}, nil
 }
 
@@ -29,7 +39,7 @@ func NewHandler(dexClient *dex.Client, clusterRoleName string) (sdk.Handler, err
 type Handler struct {
 	dexClient       *dex.Client
 	clusterRoleName string
-	ssoCookieKey    string
+	operatorConfig  operatorConfig
 }
 
 // Handle handles SSO operator events
@@ -79,7 +89,7 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		}
 
 		// Deploy the OIDC proxy
-		proxyResources, err := proxy.Deploy(sso, client, h.ssoCookieKey)
+		proxyResources, err := proxy.Deploy(sso, client, h.operatorConfig.ssoCookieKey)
 		if err != nil {
 			return errors.Wrapf(err, "deploying '%s' SSO proxy", sso.GetName())
 		}
@@ -103,7 +113,7 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		client.RedirectUris = redirectURLs
 
 		// Update the OIDC proxy
-		err = proxy.Update(proxyResources, sso, client, h.ssoCookieKey)
+		err = proxy.Update(proxyResources, sso, client, h.operatorConfig.ssoCookieKey)
 		if err != nil {
 			return errors.Wrapf(err, "updating '%s' SSO proxy", sso.GetName())
 		}
