@@ -98,7 +98,7 @@ func (o *OperatorOptions) Run() {
 
 	// configure the operator
 	sdk.Watch("jenkins.io/v1", "SSO", watchNamespace, 5)
-	handler, err := operator.NewHandler(dexClient, o.Namespace, o.ClusterRoleName)
+	handler, err := operator.NewHandler(dexClient, namespace, o.ClusterRoleName)
 	if err != nil {
 		logrus.Errorf("failed to create the operator handler: %v", err)
 		os.Exit(2)
