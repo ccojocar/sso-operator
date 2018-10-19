@@ -16,6 +16,7 @@ import (
 func NewHandler(dexClient *dex.Client, namespace string, clusterRoleName string) (sdk.Handler, error) {
 	config, err := getOperatorConfigFromSecret(namespace)
 	if err != nil {
+		logrus.Info("operator generating the cookie key")
 		ssoCookieKey, err := proxy.GenerateCookieKey()
 		if err != nil {
 			return nil, errors.Wrap(err, "generating the sso cookie key")

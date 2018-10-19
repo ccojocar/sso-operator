@@ -4,6 +4,7 @@ import (
 	"github.com/jenkins-x/sso-operator/pkg/kubernetes"
 	"github.com/pkg/errors"
 	"k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -24,17 +25,36 @@ func getOperatorConfigFromSecret(namespace string) (*operatorConfig, error) {
 
 	secret, err := k8sClient.CoreV1().Secrets(namespace).Get(operatorSecretName, metav1.GetOptions{})
 	if err != nil {
-		return nil, errors.Wrap(err, "getting the operator secret")
+		if apierrors.IsNotFound(err) {
+			return nil, errors.New("operator config secret not found")
+		}
+		delerr := deleteOperatorConfigSecret(namespace)
+		if delerr != nil {
+			return nil, errors.Wrap(delerr, "cleaning up the operator config secert")
+		}
+		return nil, errors.Wrap(err, "cleaning up the operator config secret due to error")
 	}
 
 	cookieKey, ok := secret.StringData[ssoCookieKey]
 	if !ok {
+		delerr := deleteOperatorConfigSecret(namespace)
+		if delerr != nil {
+			return nil, errors.Wrap(delerr, "cleaning up the operator config secert because cookie key is missing")
+		}
 		return nil, errors.New("sso cookie key not found in operator secret")
 	}
 
 	return &operatorConfig{
 		ssoCookieKey: cookieKey,
 	}, nil
+}
+
+func deleteOperatorConfigSecret(namespace string) error {
+	k8sClient, err := kubernetes.GetClientset()
+	if err != nil {
+		return errors.Wrap(err, "getting k8s client")
+	}
+	return k8sClient.CoreV1().Secrets(namespace).Delete(operatorSecretName, &metav1.DeleteOptions{})
 }
 
 func storeOperatorConfigInSecret(namespace string, config *operatorConfig) error {
