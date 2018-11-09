@@ -2,6 +2,10 @@
 
 Single Sign-On Kubernetes [operator](https://coreos.com/operators/) for [dex](https://github.com/coreos/dex), which can provision, expose and manage a [SSO proxy](https://github.com/bitly/oauth2_proxy) for a Kubernetes service. 
 
+## Architecture
+
+![architecture](images/architecture.png?row=true)
+
 ## Installation 
 
 ### Using Jenkins X
