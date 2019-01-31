@@ -48,14 +48,6 @@ func NewClient(opts *Options) (*Client, error) {
 			opts.ClientCrt, opts.ClientKey)
 	}
 
-	// Check if the client certificate and private key were successfully loaded
-	if len(clientCert.Certificate) == 1 {
-		return nil, fmt.Errorf("failed to load the client cert from %q", opts.ClientCrt)
-	}
-	if clientCert.PrivateKey == nil {
-		return nil, fmt.Errorf("failed to load the client private key from %q", opts.ClientKey)
-	}
-
 	clientTLSConfig := &tls.Config{
 		RootCAs:      certPool,
 		Certificates: []tls.Certificate{clientCert},
