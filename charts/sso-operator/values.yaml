@@ -5,7 +5,7 @@ replicaCount: 1
 image:
   repository: jenkinsxio/sso-operator
   tag: 1.2.2
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 service:
   name: sso-operator
   type: ClusterIP
