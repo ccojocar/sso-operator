@@ -23,7 +23,7 @@ jx create addon sso
 
 #### Prerequisites
 
-The operator requires the [dex](https://github.com/coreos/dex) identity provider and the [cert-manager](https://github.com/jetstack/cert-manager) to be installed into your cluster. 
+The operator requires the [dex](https://github.com/coreos/dex) identity provider and the [cert-manager](https://github.com/jetstack/cert-manager) version `v.0.6.0` to be installed into your cluster. 
 You can install `dex`using this [helm chart](https://github.com/jenkins-x/dex/tree/master/charts/dex), which pre-configures the `GitHub connector`, and relies on `cert-manager` 
 to issue certificates for dex gRPC API.
 
