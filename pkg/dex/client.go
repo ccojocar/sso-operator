@@ -13,31 +13,44 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
+// Options keeps some configuration options for Dex client
+type Options struct {
+	// HostAndPort host name and port of gRPC server
+	HostAndPort string
+	// ClientCrt TLS certificate for gRPC client
+	ClientCrt string
+	// ClientKey TLS certificate key for gRPC client
+	ClientKey string
+	// ClientCA self signed CA certificate for gRPC TLS connection
+	ClientCA string
+}
+
 // Client represent a client wrapper for Dex
 type Client struct {
 	dex api.DexClient
 }
 
 // NewClient creates a new Dex client
-func NewClient(hostAndPort, clientCrt, clientKey string) (*Client, error) {
+func NewClient(opts *Options) (*Client, error) {
 	certPool := x509.NewCertPool()
-	caCert, err := ioutil.ReadFile(clientCrt) // #nosec
+	caCert, err := ioutil.ReadFile(opts.ClientCA) // #nosec
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to load the public CA cert '%s'", clientCrt)
+		return nil, errors.Wrapf(err, "failed to load the public CA cert from %q", opts.ClientCA)
 	}
 	appended := certPool.AppendCertsFromPEM(caCert)
 	if !appended {
 		return nil, errors.New("failed to append the CA cert to the certs pool")
 	}
 
-	clientCert, err := tls.LoadX509KeyPair(clientCrt, clientKey)
+	clientCert, err := tls.LoadX509KeyPair(opts.ClientCrt, opts.ClientKey)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to load the client cert '%s' and key '%s'", clientCrt, clientKey)
+		return nil, errors.Wrapf(err, "failed to load the client cert %q and key %q",
+			opts.ClientCrt, opts.ClientKey)
 	}
 
 	// The CA public cert should be packaged with the client cert
 	if len(clientCert.Certificate) != 2 {
-		return nil, fmt.Errorf("failed to load the CA cert from '%s'", clientCrt)
+		return nil, fmt.Errorf("failed to load the CA cert from %q", opts.ClientCrt)
 	}
 
 	clientTLSConfig := &tls.Config{
@@ -46,9 +59,9 @@ func NewClient(hostAndPort, clientCrt, clientKey string) (*Client, error) {
 	}
 	creds := credentials.NewTLS(clientTLSConfig)
 
-	conn, err := grpc.Dial(hostAndPort, grpc.WithTransportCredentials(creds))
+	conn, err := grpc.Dial(opts.HostAndPort, grpc.WithTransportCredentials(creds))
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to open the gRPC connection with server '%s'", hostAndPort)
+		return nil, errors.Wrapf(err, "failed to open the gRPC connection with server %q", opts.HostAndPort)
 	}
 	return &Client{
 		dex: api.NewDexClient(conn),
@@ -74,7 +87,7 @@ func (c *Client) CreateClient(ctx context.Context, redirectUris []string, truste
 	}
 
 	if res.AlreadyExists {
-		return nil, errors.Wrapf(err, "client '%s' already exists", res.Client.Id)
+		return nil, errors.Wrapf(err, "client %q already exists", res.Client.Id)
 	}
 
 	return res.Client, nil
@@ -94,11 +107,11 @@ func (c *Client) UpdateClient(ctx context.Context, clientID string, redirectUris
 
 	res, err := c.dex.UpdateClient(ctx, req)
 	if err != nil {
-		return errors.Wrapf(err, "failed to update the client with id '%s'", clientID)
+		return errors.Wrapf(err, "failed to update the client with id %q", clientID)
 	}
 
 	if res.NotFound {
-		return fmt.Errorf("update did not find the client with id '%s'", clientID)
+		return fmt.Errorf("update did not find the client with id %q", clientID)
 	}
 	return nil
 }
@@ -110,10 +123,10 @@ func (c *Client) DeleteClient(ctx context.Context, id string) error {
 	}
 	res, err := c.dex.DeleteClient(ctx, req)
 	if err != nil {
-		return errors.Wrapf(err, "failed to delete the client with id '%s'", id)
+		return errors.Wrapf(err, "failed to delete the client with id %q", id)
 	}
 	if res.NotFound {
-		return fmt.Errorf("delete did not find the client with id '%s'", id)
+		return fmt.Errorf("delete did not find the client with id %q", id)
 	}
 	return nil
 }

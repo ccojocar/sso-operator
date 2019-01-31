@@ -31,6 +31,7 @@ type OperatorOptions struct {
 	DexGrpcHostAndPort string
 	DexGrpcClientCrt   string
 	DexGrpcClientKey   string
+	DexGrpcClientCa    string
 	ClusterRoleName    string
 }
 
@@ -76,7 +77,13 @@ func (o *OperatorOptions) Run() {
 		os.Exit(2)
 	}
 
-	dexClient, err := dex.NewClient(o.DexGrpcHostAndPort, o.DexGrpcClientCrt, o.DexGrpcClientKey)
+	opts := &dex.Options{
+		HostAndPort: o.DexGrpcHostAndPort,
+		ClientCrt:   o.DexGrpcClientCrt,
+		ClientKey:   o.DexGrpcClientKey,
+		ClientCA:    o.DexGrpcClientCa,
+	}
+	dexClient, err := dex.NewClient(opts)
 	if err != nil {
 		logrus.Errorf("failed to crate dex client: %v", err)
 		os.Exit(2)
@@ -143,6 +150,7 @@ func commandRoot() *cobra.Command {
 	rootCmd.Flags().StringVarP(&options.DexGrpcHostAndPort, "dex-grpc-host-port", "", "", "Host and port of Dex gRPC server")
 	rootCmd.Flags().StringVarP(&options.DexGrpcClientCrt, "dex-grpc-client-crt", "", "", "Certificate for Dex gRPC client")
 	rootCmd.Flags().StringVarP(&options.DexGrpcClientKey, "dex-grpc-client-key", "", "", "Key for Dex gRPC client")
+	rootCmd.Flags().StringVarP(&options.DexGrpcClientCa, "dex-grpc-client-ca", "", "", "CA certificate for Dex gRPC client")
 	rootCmd.Flags().StringVarP(&options.ClusterRoleName, "cluster-role-name", "", "", "Cluster role name which has the required permissions for operator")
 
 	return rootCmd
