@@ -4,7 +4,7 @@
 replicaCount: 1
 image:
   repository: jenkinsxio/sso-operator
-  tag: 1.2.2
+  tag: 1.2.4
   pullPolicy: Always
 service:
   name: sso-operator

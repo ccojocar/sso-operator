@@ -35,7 +35,7 @@ func NewClient(opts *Options) (*Client, error) {
 	certPool := x509.NewCertPool()
 	caCert, err := ioutil.ReadFile(opts.ClientCA) // #nosec
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to load the public CA cert from %q", opts.ClientCA)
+		return nil, errors.Wrapf(err, "reading the public CA cert from %q", opts.ClientCA)
 	}
 	appended := certPool.AppendCertsFromPEM(caCert)
 	if !appended {
@@ -44,13 +44,16 @@ func NewClient(opts *Options) (*Client, error) {
 
 	clientCert, err := tls.LoadX509KeyPair(opts.ClientCrt, opts.ClientKey)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to load the client cert %q and key %q",
+		return nil, errors.Wrapf(err, "loading the client cert %q and private key %q",
 			opts.ClientCrt, opts.ClientKey)
 	}
 
-	// The CA public cert should be packaged with the client cert
-	if len(clientCert.Certificate) != 2 {
-		return nil, fmt.Errorf("failed to load the CA cert from %q", opts.ClientCrt)
+	// Check if the client certificate and private key were successfully loaded
+	if len(clientCert.Certificate) == 1 {
+		return nil, fmt.Errorf("failed to load the client cert from %q", opts.ClientCrt)
+	}
+	if clientCert.PrivateKey == nil {
+		return nil, fmt.Errorf("failed to load the client private key from %q", opts.ClientKey)
 	}
 
 	clientTLSConfig := &tls.Config{
@@ -61,7 +64,7 @@ func NewClient(opts *Options) (*Client, error) {
 
 	conn, err := grpc.Dial(opts.HostAndPort, grpc.WithTransportCredentials(creds))
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to open the gRPC connection with server %q", opts.HostAndPort)
+		return nil, errors.Wrapf(err, "opening the gRPC connection with server %q", opts.HostAndPort)
 	}
 	return &Client{
 		dex: api.NewDexClient(conn),
