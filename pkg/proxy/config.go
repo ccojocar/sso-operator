@@ -93,7 +93,7 @@ cookie_httponly = {{.Cookie.HTTPOnly}}
 ## Provider Specific Configurations
 provider = "oidc"
 oidc_issuer_url = "{{.OIDCIssuerURL}}"
-scope = "openid email profile"
+scope = "openid email profile groups federated:id"
 skip_provider_button = true
 `
 
