@@ -220,6 +220,7 @@ func exposeConfigMap(sso *apiv1.SSO, serviceName string) (*v1.ConfigMap, error) 
 		HTTP:     false,
 		TLSAcme:  true,
 		Services: []string{serviceName},
+		UrlTemplate: sso.Spec.UrlTemplate,
 	}
 
 	config, err := renderExposeConfig(exposeConfig)
@@ -250,6 +251,7 @@ type ExposeConfig struct {
 	HTTP     bool     `yaml:"http" json:"http"`
 	TLSAcme  bool     `yaml:"tls-acme" json:"tls_acme"`
 	Services []string `yaml:"services,omitempty" json:"services"`
+	UrlTemplate string `yaml:"urltemplate,omitempty" json:"urltemplate"`
 }
 
 func renderExposeConfig(config *ExposeConfig) (string, error) {
