@@ -42,8 +42,8 @@ type SSOSpec struct {
 	ForwardToken bool `json:"forwardToken,omitempty"`
 	// CookieSpec cookie specifications
 	CookieSpec CookieSpec `json:"cookieSpec,omitempty"`
-	// UrlTemplate to use in the exposecontroller configMap
-	UrlTemplate string `json:"urlTemplate,omitempty"`
+	// URLTemplate to use in the exposecontroller configMap
+	URLTemplate string `json:"urlTemplate,omitempty"`
 }
 
 // CookieSpec is the specification of a cookie for a Single Sign-On resource
