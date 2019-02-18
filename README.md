@@ -90,6 +90,7 @@ spec:
   forwardToken: false
   domain: "example.com"
   certIssuerName: "letsencrypt-prod"
+  urlTemplate: "{{.Service}}.{{.Namespace}}.{{.Domain}}"
   cookieSpec:
     name: "sso-golang-http"
     expire: "168h"

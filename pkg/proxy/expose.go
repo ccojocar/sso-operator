@@ -214,12 +214,13 @@ func cleanupContainer(sso *apiv1.SSO, filter string) *v1.Container {
 
 func exposeConfigMap(sso *apiv1.SSO, serviceName string) (*v1.ConfigMap, error) {
 	exposeConfig := &ExposeConfig{
-		Domain:   sso.Spec.Domain,
-		Exposer:  exposer,
-		PathMode: "",
-		HTTP:     false,
-		TLSAcme:  true,
-		Services: []string{serviceName},
+		Domain:      sso.Spec.Domain,
+		Exposer:     exposer,
+		PathMode:    "",
+		HTTP:        false,
+		TLSAcme:     true,
+		Services:    []string{serviceName},
+		URLTemplate: sso.Spec.URLTemplate,
 	}
 
 	config, err := renderExposeConfig(exposeConfig)
@@ -244,12 +245,13 @@ func exposeConfigMap(sso *apiv1.SSO, serviceName string) (*v1.ConfigMap, error) 
 
 // ExposeConfig holds the configuration for exposecontroller
 type ExposeConfig struct {
-	Domain   string   `yaml:"domain,omitempty" json:"domain"`
-	Exposer  string   `yaml:"exposer" json:"exposer"`
-	PathMode string   `yaml:"path-mode" json:"path_mode"`
-	HTTP     bool     `yaml:"http" json:"http"`
-	TLSAcme  bool     `yaml:"tls-acme" json:"tls_acme"`
-	Services []string `yaml:"services,omitempty" json:"services"`
+	Domain      string   `yaml:"domain,omitempty" json:"domain"`
+	Exposer     string   `yaml:"exposer" json:"exposer"`
+	PathMode    string   `yaml:"path-mode" json:"path_mode"`
+	HTTP        bool     `yaml:"http" json:"http"`
+	TLSAcme     bool     `yaml:"tls-acme" json:"tls_acme"`
+	Services    []string `yaml:"services,omitempty" json:"services"`
+	URLTemplate string   `yaml:"urltemplate,omitempty" json:"urltemplate"`
 }
 
 func renderExposeConfig(config *ExposeConfig) (string, error) {

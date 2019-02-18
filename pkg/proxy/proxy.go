@@ -85,10 +85,14 @@ func labels(sso *apiv1.SSO, appName string) map[string]string {
 }
 
 func serviceAnnotations(sso *apiv1.SSO, appName string) map[string]string {
+	expIngressAnnotation := ingressClassAnnotations + ": " + ingressClass
+	if len(sso.Spec.CertIssuerName) != 0 {
+		expIngressAnnotation += "\n" + certManagerAnnotation + ": " + sso.Spec.CertIssuerName
+	}
 	return map[string]string{
 		exposeAnnotation:        "true",
 		ingressNameAnnotation:   appName,
-		exposeIngressAnnotation: ingressClassAnnotations + ": " + ingressClass + "\n" + certManagerAnnotation + ": " + sso.Spec.CertIssuerName,
+		exposeIngressAnnotation: expIngressAnnotation,
 	}
 }
 
