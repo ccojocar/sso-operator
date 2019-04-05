@@ -76,10 +76,20 @@ func ConvertHostsToRedirectURLs(hosts []string, sso *apiv1.SSO) []string {
 	return redirectURLs
 }
 
+// buildName concatenates resourceName and suffix equally with a max length of 63 chars
 func buildName(resourceName string, suffix string) string {
 	name := resourceName
-	if len(resourceName) > 62-len(suffix) {
-		name = strings.TrimSuffix(name[0:62-len(suffix)], "-")
+
+	maxLenName := 62
+	maxLenOnePart := maxLenName / 2
+	switch {
+	case len(suffix) > maxLenOnePart && len(name) > maxLenOnePart:
+		name = strings.TrimSuffix(name[:maxLenOnePart], "-")
+		suffix = strings.TrimSuffix(suffix[:maxLenOnePart], "-")
+	case len(suffix) > maxLenOnePart && len(name) < maxLenOnePart:
+		suffix = strings.TrimSuffix(suffix[:62-len(name)], "-")
+	case len(suffix) < maxLenOnePart && len(name) > maxLenOnePart:
+		name = strings.TrimSuffix(name[:maxLenName-len(suffix)], "-")
 	}
 
 	if suffix != "" {
