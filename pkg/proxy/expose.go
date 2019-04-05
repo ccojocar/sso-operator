@@ -135,11 +135,11 @@ func Cleanup(sso *apiv1.SSO, serviceName string, serviceAccount string) error {
 
 func createJob(name string, sso *apiv1.SSO, serviceAccount string, container *v1.Container) *batchv1.Job {
 	ns := sso.GetNamespace()
-	name = fmt.Sprintf("%s-%s", buildName(sso.GetName(), ns), name)
+	jobName := buildName(sso.GetName(), name)
 
 	podTempl := v1.PodTemplateSpec{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
+			Name:      jobName,
 			Namespace: ns,
 		},
 		Spec: v1.PodSpec{
@@ -165,7 +165,7 @@ func createJob(name string, sso *apiv1.SSO, serviceAccount string, container *v1
 			APIVersion: "batch/v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
+			Name:      jobName,
 			Namespace: ns,
 		},
 		Spec: batchv1.JobSpec{
@@ -176,7 +176,7 @@ func createJob(name string, sso *apiv1.SSO, serviceAccount string, container *v1
 
 func exposeContainer(sso *apiv1.SSO) *v1.Container {
 	return &v1.Container{
-		Name:            fmt.Sprintf("%s-expose", sso.GetName()),
+		Name:            buildName(sso.GetName(), "expose"),
 		Image:           fmt.Sprintf("%s:%s", exposeImage, exposeImageTag),
 		ImagePullPolicy: v1.PullIfNotPresent,
 		Command:         []string{exposeCmd},
@@ -195,7 +195,7 @@ func exposeContainer(sso *apiv1.SSO) *v1.Container {
 
 func cleanupContainer(sso *apiv1.SSO, filter string) *v1.Container {
 	return &v1.Container{
-		Name:            fmt.Sprintf("%s-cleanup", sso.GetName()),
+		Name:            buildName(sso.GetName(), "cleanup"),
 		Image:           fmt.Sprintf("%s:%s", exposeImage, exposeImageTag),
 		ImagePullPolicy: v1.PullIfNotPresent,
 		Command:         []string{exposeCmd},

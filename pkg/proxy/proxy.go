@@ -76,8 +76,26 @@ func ConvertHostsToRedirectURLs(hosts []string, sso *apiv1.SSO) []string {
 	return redirectURLs
 }
 
-func buildName(name string, namespace string) string {
-	return fmt.Sprintf("%s-%s", namespace, name)
+// buildName concatenates resourceName and suffix equally with a max length of 63 chars
+func buildName(resourceName string, suffix string) string {
+	name := resourceName
+
+	maxLenName := 62
+	maxLenOnePart := maxLenName / 2
+	switch {
+	case len(suffix) > maxLenOnePart && len(name) > maxLenOnePart:
+		name = strings.TrimSuffix(name[:maxLenOnePart], "-")
+		suffix = strings.TrimSuffix(suffix[:maxLenOnePart], "-")
+	case len(suffix) > maxLenOnePart && len(name) < maxLenOnePart:
+		suffix = strings.TrimSuffix(suffix[:62-len(name)], "-")
+	case len(suffix) < maxLenOnePart && len(name) > maxLenOnePart:
+		name = strings.TrimSuffix(name[:maxLenName-len(suffix)], "-")
+	}
+
+	if suffix != "" {
+		return fmt.Sprintf("%s-%s", name, suffix)
+	}
+	return name
 }
 
 func labels(sso *apiv1.SSO, appName string) map[string]string {
@@ -116,7 +134,7 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client, cookieSecret string) (*Proxy
 	secretVersion := computeSecretVersion(secret)
 	podTempl := v1.PodTemplateSpec{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      buildName(sso.GetName(), sso.GetNamespace()),
+			Name:      buildName(sso.GetName(), ""),
 			Namespace: ns,
 			Labels:    labels(sso, appName),
 		},
@@ -133,7 +151,7 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client, cookieSecret string) (*Proxy
 		},
 	}
 
-	deployment := buildName(sso.GetName(), sso.GetNamespace())
+	deployment := buildName(sso.GetName(), "")
 	var replicas int32 = replicas
 	d := &appsv1.Deployment{
 		TypeMeta: metav1.TypeMeta{
@@ -296,7 +314,7 @@ func ownerRef(sso *apiv1.SSO) metav1.OwnerReference {
 
 func proxyContainer(sso *apiv1.SSO, secretVersion string) v1.Container {
 	return v1.Container{
-		Name:            sso.GetName(),
+		Name:            buildName(sso.GetName(), ""),
 		Image:           fmt.Sprintf("%s:%s", sso.Spec.ProxyImage, sso.Spec.ProxyImageTag),
 		ImagePullPolicy: v1.PullIfNotPresent,
 		Args:            []string{fmt.Sprintf("--config=%s", configPath)},
