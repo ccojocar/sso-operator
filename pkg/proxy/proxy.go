@@ -83,6 +83,10 @@ func buildName(resourceName string, suffix string) string {
 	maxLenName := 62
 	maxLenOnePart := maxLenName / 2
 	switch {
+	case len(suffix) > 0 && len(name)+len(suffix) < maxLenName:
+		return fmt.Sprintf("%s-%s", name, suffix)
+	case len(suffix) == 0 && len(name) < maxLenName:
+		return name
 	case len(suffix) > maxLenOnePart && len(name) > maxLenOnePart:
 		name = strings.TrimSuffix(name[:maxLenOnePart], "-")
 		suffix = strings.TrimSuffix(suffix[:maxLenOnePart], "-")
@@ -90,6 +94,8 @@ func buildName(resourceName string, suffix string) string {
 		suffix = strings.TrimSuffix(suffix[:62-len(name)], "-")
 	case len(suffix) < maxLenOnePart && len(name) > maxLenOnePart:
 		name = strings.TrimSuffix(name[:maxLenName-len(suffix)], "-")
+	case len(name) > maxLenName+1:
+		name = strings.TrimSuffix(name[:maxLenName], "-")
 	}
 
 	if suffix != "" {
