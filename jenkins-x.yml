@@ -22,6 +22,10 @@ pipelineConfig:
             value: /builder/home/.helm
           - name: GOOGLE_APPLICATION_CREDENTIALS
             value: /builder/home/kaniko-secret.json
+          - name: GOPATH
+            value: /workspace/source/go
+          - name: GOPROXY
+            value: http://jx-app-athens-athens-proxy
           steps:
           - name: init-helm
             image: alpine/helm:2.12.3
@@ -96,11 +100,6 @@ pipelineConfig:
             dir: /workspace/source/go/src/github.com/jenkins-x/sso-operator
             command: make
             args: ['release']
-            env:
-            - name: GOPATH
-              value: /workspace/go
-            - name: GOPROXY
-              value: http://jx-app-athens-athens-proxy
             resources:
               limits:
                 cpu: 4
@@ -147,6 +146,8 @@ pipelineConfig:
             value: http://jenkins-x-athens-proxy:80
           - name: GOOGLE_APPLICATION_CREDENTIALS
             value: /builder/home/kaniko-secret.json
+          - name: GOPATH
+            value: /workspace/source/go
           steps:
           - name: init-helm
             image: alpine/helm:2.12.3
