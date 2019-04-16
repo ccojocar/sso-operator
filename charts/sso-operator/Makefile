@@ -2,14 +2,14 @@ CHART_REPO := http://jenkins-x-chartmuseum:8080
 CURRENT=$(pwd)
 NAME := sso-operator
 OS := $(shell uname)
-VERSION := $(shell cat ../../VERSION)
+CHARTMUSEUM_CREDS_USR := $(shell cat /builder/home/basic-auth-user 2> /dev/null)
+CHARTMUSEUM_CREDS_PSW := $(shell cat /builder/home/basic-auth-pass 2> /dev/null)
 
 init: 
 	helm init --client-only
 
 setup: init
-	helm repo add jenkins-x-api https://chartmuseum.build.cd.jenkins-x.io 	
-	helm repo add jenkinsxio https://chartmuseum.jx.cd.jenkins-x.io 
+	helm repo add jenkinsx http://chartmuseum.jenkins-x.io 	
 
 build: clean setup
 	helm dependency build
