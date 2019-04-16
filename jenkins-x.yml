@@ -99,7 +99,8 @@ pipelineConfig:
             image: gcr.io/jenkinsxio/builder-go:0.1.332
             dir: /workspace/source/go/src/github.com/jenkins-x/sso-operator
             command: make
-            args: ['release']
+            args:
+            - all
             resources:
               limits:
                 cpu: 4
