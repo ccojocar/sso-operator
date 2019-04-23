@@ -127,7 +127,7 @@ pipelineConfig:
 
           - name: release-charts
             image: gcr.io/jenkinsxio/builder-go:0.1.332
-            dir: /workspace/source/go/src/github.com/jenkins-x/sso-operator/charts/sso-operator
+            dir: /workspace/source/go/src/github.com/jenkins-x/sso-operator/charts/sso/sso-operator
             command: make
             args:
             - release
