@@ -26,6 +26,12 @@ pipelineConfig:
             value: /workspace/source/go
           - name: GOPROXY
             value: http://jx-app-athens-athens-proxy
+          - name: APP_NAME
+            value: sso-operator
+          - name: ORG
+            value: jenkinsxio
+          - name: DOCKER_REGISTRY
+            value: docker.io
           steps:
           - name: init-helm
             image: alpine/helm:2.12.3
@@ -149,6 +155,12 @@ pipelineConfig:
             value: /builder/home/kaniko-secret.json
           - name: GOPATH
             value: /workspace/source/go
+          - name: APP_NAME
+            value: sso-operator
+          - name: ORG
+            value: jenkinsxio
+          - name: DOCKER_REGISTRY
+            value: docker.io
           steps:
           - name: init-helm
             image: alpine/helm:2.12.3
