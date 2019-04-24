@@ -52,7 +52,7 @@ You can select TLS and provide your `DEX_DOMAIN` and email. This command will co
 #### Install the operator
 
 ```
-helm install --namespace <NAMESPACE> --set dex.grpcHost=dex.<DEX_NAMESPACE> charts/sso-operator/ 
+helm install --namespace <NAMESPACE> --set dex.grpcHost=dex.<DEX_NAMESPACE> charts/sso/sso-operator/ 
 ```
 
 ## Enable Single Sign-On for a service 
