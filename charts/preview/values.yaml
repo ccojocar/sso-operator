@@ -17,6 +17,6 @@ cleanup:
 
 preview:
   image:
-    repository:
+    repo: gcr.io/jenkinsxio/sso-operator
     tag:
     pullPolicy: IfNotPresent

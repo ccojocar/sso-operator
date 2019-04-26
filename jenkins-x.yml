@@ -28,10 +28,6 @@ pipelineConfig:
             value: http://jx-app-athens-athens-proxy
           - name: APP_NAME
             value: sso-operator
-          - name: ORG
-            value: jenkinsxio
-          - name: DOCKER_REGISTRY
-            value: docker.io
           steps:
           - name: init-helm
             image: alpine/helm:2.12.3
@@ -121,13 +117,13 @@ pipelineConfig:
             command: /kaniko/executor
             args: 
             - --dockerfile=/workspace/source/go/src/github.com/jenkins-x/sso-operator/Dockerfile
-            - --destination=docker.io/jenkinsxio/sso-operator:${inputs.params.version}
+            - --destination=grc.io/jenkinsxio/sso-operator:${inputs.params.version}
             - --context=/workspace/source/go/src/github.com/jenkins-x/sso-operator
             - --cache-dir=/workspace
 
           - name: release-charts
             image: gcr.io/jenkinsxio/builder-go:0.1.332
-            dir: /workspace/source/go/src/github.com/jenkins-x/sso-operator/charts/sso/sso-operator
+            dir: /workspace/source/go/src/github.com/jenkins-x/sso-operator/charts/sso-operator
             command: make
             args:
             - release
@@ -157,10 +153,6 @@ pipelineConfig:
             value: /workspace/source/go
           - name: APP_NAME
             value: sso-operator
-          - name: ORG
-            value: jenkinsxio
-          - name: DOCKER_REGISTRY
-            value: docker.io
           steps:
           - name: init-helm
             image: alpine/helm:2.12.3
@@ -219,7 +211,7 @@ pipelineConfig:
             command: /kaniko/executor
             args:
             - --dockerfile=/workspace/source/go/src/github.com/jenkins-x/sso-operator/Dockerfile
-            - --destination=docker.io/jenkinsxio/sso-operator:${inputs.params.version}
+            - --destination=gcr.io/jenkinsxio/sso-operator:${inputs.params.version}
             - --context=/workspace/source/go/src/github.com/jenkins-x/sso-operator
             - --cache-dir=/workspace
 
