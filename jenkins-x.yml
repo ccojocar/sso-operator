@@ -117,7 +117,7 @@ pipelineConfig:
             command: /kaniko/executor
             args: 
             - --dockerfile=/workspace/source/go/src/github.com/jenkins-x/sso-operator/Dockerfile
-            - --destination=grc.io/jenkinsxio/sso-operator:${inputs.params.version}
+            - --destination=gcr.io/jenkinsxio/sso-operator:${inputs.params.version}
             - --context=/workspace/source/go/src/github.com/jenkins-x/sso-operator
             - --cache-dir=/workspace
 
