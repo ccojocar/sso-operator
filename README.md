@@ -13,7 +13,7 @@ Single Sign-On Kubernetes [operator](https://coreos.com/operators/) for [dex](ht
 You can install the operator and its dependencies with [Jenkins X](https://jenkins-x.io/). The only requirement is to have already allocated a DNS domain for your ingress controller.
 
 
-You can execute the command bellow and then follow all the wizard steps:
+You can execute the command bellow and then follow the wizard steps:
 
 ```
 jx create addon sso 
@@ -24,12 +24,12 @@ jx create addon sso
 #### Prerequisites
 
 The operator requires the [dex](https://github.com/coreos/dex) identity provider and the [cert-manager](https://github.com/jetstack/cert-manager) version `v.0.6.0` to be installed into your cluster. 
-You can install `dex`using this [helm chart](https://github.com/jenkins-x/dex/tree/master/charts/dex), which pre-configures the `GitHub connector`, and relies on `cert-manager` 
-to issue certificates for dex gRPC API.
+You can install `dex`using following [helm chart](https://github.com/jenkins-x/dex/tree/master/charts/dex), which pre-configures the `GitHub connector`, and uses the `cert-manager` service to retrieve 
+the TLS certificates for dex gRPC API.
 
-Before starting the installation, you have to create a [GitHub OAuth App](https://github.com/settings/applications/new) which should have  as `callback` *https://DEX_DOMAIN/callback* URL.
+Before starting the installation, you have to create a [GitHub OAuth App](https://github.com/settings/applications/new) which should have  as `callback` the *https://DEX_DOMAIN/callback* URL.
 
-You can install the chart as follows:
+You can install the `dex` chart as follows:
 ```
 helm upgrade -i --namespace <NAMESAPCE> --wait --timeout 600 dex \
          --set domain="<DEX_DOMAIN>" \
@@ -39,7 +39,7 @@ helm upgrade -i --namespace <NAMESAPCE> --wait --timeout 600 dex \
          .
 ```
 
-The web endpoints provided by dex IdP have to be publicly exposed and secured with TLS. You can do  this pretty easy, if you have the [Jenkins X](https://jenkins-x.io/) installed into your cluster.
+The web endpoints provided by `dex` IdP have to be publicly exposed and secured with TLS. You can do  this pretty easy, if you have the [Jenkins X](https://jenkins-x.io/) installed into your cluster.
 
 Just executing the command:
 
@@ -47,12 +47,18 @@ Just executing the command:
 jx upgrade ingress 
 ```
 
-You can select TLS and provide your `DEX_DOMAIN` and email. This command will configure the ingress controller to fetch automatically the TLS certificate from a Let's Encrypt CA server.
+You can select TLS and provide your `DEX_DOMAIN` and email. This command will configure the ingress controller to fetch automatically the TLS certificate from Let's Encrypt CA server.
 
 #### Install the operator
 
+First, you will need to add the jenkins-x chart repository to your helm repositories:
+```sh
+helm repo add jenkins-x http://chartmuseum.jenkins-x.io
+helm repo update
 ```
-helm install --namespace <NAMESPACE> --set dex.grpcHost=dex.<DEX_NAMESPACE> charts/sso/sso-operator/ 
+You can now install the chart with:
+```
+helm install --namespace <NAMESPACE> --set dex.grpcHost=dex.<DEX_NAMESPACE> --name sso-operator jenkins-x/sso-operator 
 ```
 
 ## Enable Single Sign-On for a service 
