@@ -12,7 +12,7 @@ BUILDFLAGS := ''
 CGO_ENABLED = 0
 VENDOR_DIR=vendor
 
-all: bootstrap fmt lint sec test build
+all: bootstrap fmt lint test build
 
 DEP := $(GOPATH)/bin/dep
 $(DEP):
