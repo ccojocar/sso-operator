@@ -12,7 +12,7 @@ BUILDFLAGS := ''
 CGO_ENABLED = 0
 VENDOR_DIR=vendor
 
-all: bootstrap fmt lint test build
+all: bootstrap fmt lint sec test build
 
 DEP := $(GOPATH)/bin/dep
 $(DEP):
@@ -52,7 +52,7 @@ lint: $(GOLINT)
 
 GOSEC := $(GOPATH)/bin/gosec
 $(GOSEC):
-	go get -u github.com/securego/gosec/cmd/gosec/...
+	go get -u github.com/securego/gosec/cmd/gosec
 
 .PHONY: sec
 sec: $(GOSEC)
