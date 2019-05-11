@@ -95,10 +95,14 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 			return errors.Wrapf(err, "deploying '%s' SSO proxy", sso.GetName())
 		}
 
-		// Expose the OIDC proxy service publicly
-		err = proxy.Expose(sso, proxyResources.Service.GetName(), saName)
-		if err != nil {
-			return errors.Wrapf(err, "exposing '%s' SSO proxy", sso.GetName())
+		// Expose the OIDC proxy service publicly unless sso config is set to skip it
+		if sso.Spec.SkipExposeService {
+			logrus.Infof("skipping exposecontrolller step for '%s'", sso.GetName())
+		} else {
+			err = proxy.Expose(sso, proxyResources.Service.GetName(), saName)
+			if err != nil {
+				return errors.Wrapf(err, "exposing '%s' SSO proxy", sso.GetName())
+			}
 		}
 
 		// Update in dex the redirect URL of the OIDC client
