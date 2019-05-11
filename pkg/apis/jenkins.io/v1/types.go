@@ -44,6 +44,8 @@ type SSOSpec struct {
 	CookieSpec CookieSpec `json:"cookieSpec,omitempty"`
 	// URLTemplate to use in the exposecontroller configMap
 	URLTemplate string `json:"urlTemplate,omitempty"`
+	// SkipExposeService to avoid using exposecontroller to create ingress rule for proxy
+	SkipExposeService bool `json:"skipExposeService,omitempty"`
 }
 
 // CookieSpec is the specification of a cookie for a Single Sign-On resource

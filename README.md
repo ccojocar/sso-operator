@@ -126,3 +126,20 @@ sso-golang-http   sso-golang-http.jx-staging.example.com                        
 ```
 
 You can open now the `https://sso-golang-http.jx-staging.example.com` URL in a browser and check if Single Sign-On works with your GitHub user.
+
+## Extra configuration options
+
+
+You may want to skip the exposecontroller step if you are creating the ingress rules for your application yourself.  Here you can use the `skipExposeService` config.
+```yaml
+cat <<EOF | kubectl create -f -
+apiVersion: "jenkins.io/v1"
+kind: "SSO"
+metadata:
+  name: "sso-golang-http"
+  namespace: jx-staging
+spec:
+  skipExposeService: true
+
+  ...
+```
