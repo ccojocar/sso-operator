@@ -1,4 +1,3 @@
-buildPack: none
 pipelineConfig:
   pipelines:
     release:
@@ -28,18 +27,12 @@ pipelineConfig:
             value: http://jx-app-athens-athens-proxy
           - name: APP_NAME
             value: sso-operator
+
           steps:
           - name: init-helm
             image: alpine/helm:2.12.3
             command: helm
             args: ['init','--client-only']
-            resources:
-              limits:
-                cpu: 0.2
-                memory: 128Mi
-              requests:
-                cpu: 0.1
-                memory: 64Mi
 
           - image: jenkinsxio/jx:1.3.1008 
             command: jx
@@ -77,46 +70,12 @@ pipelineConfig:
             - -f
             - /builder/home/basic-auth-pass
 
-          - image: gcr.io/jenkinsxio/builder-go:0.1.320
-            command: mv
-            args:
-              - /workspace/source
-              - /workspace/tmp
-
-          - image: gcr.io/jenkinsxio/builder-go:0.1.320
-            dir: /workspace/tmp
-            command: mkdir
-            args:
-              - -p
-              - /workspace/source/go/src/github.com/jenkins-x
-
-          - image: gcr.io/jenkinsxio/builder-go:0.1.320
-            dir: /workspace/tmp
-            command: mv
-            args:
-              - /workspace/tmp
-              - /workspace/source/go/src/github.com/jenkins-x/sso-operator
-
-          - name: release
-            image: gcr.io/jenkinsxio/builder-go:0.1.332
-            dir: /workspace/source/go/src/github.com/jenkins-x/sso-operator
-            command: make
-            args:
-            - all
-            resources:
-              limits:
-                cpu: 4
-                memory: 6144Mi
-              requests:
-                cpu: 3
-                memory: 3072Mi
-
           - name: build-and-push-image
             image: gcr.io/kaniko-project/executor:9912ccbf8d22bbafbf971124600fbb0b13b9cbd6
             dir: /workspace/source/go/src/github.com/jenkins-x/sso-operator
             command: /kaniko/executor
             args: 
-            - --dockerfile=/workspace/source/go/src/github.com/jenkins-x/sso-operator/Dockerfile
+            - --dockerfile=/workspace/source/Dockerfile
             - --destination=gcr.io/jenkinsxio/sso-operator:${inputs.params.version}
             - --context=/workspace/source/go/src/github.com/jenkins-x/sso-operator
             - --cache-dir=/workspace
@@ -153,20 +112,14 @@ pipelineConfig:
             value: /workspace/source/go
           - name: APP_NAME
             value: sso-operator
+
           steps:
           - name: init-helm
             image: alpine/helm:2.12.3
             command: helm
             args: ['init','--client-only']
-            resources:
-              limits:
-                cpu: 0.2
-                memory: 128Mi
-              requests:
-                cpu: 0.1
-                memory: 64Mi
 
-          - image: jenkinsxio/jx:1.3.1008 
+          - image: jenkinsxio/jx:1.3.1008
             command: jx
             args:
             - step
@@ -178,40 +131,13 @@ pipelineConfig:
             - -f
             - /builder/home/kaniko-secret.json
 
-          - image: gcr.io/jenkinsxio/builder-go:0.1.320
-            command: mv
-            args:
-              - /workspace/source
-              - /workspace/tmp
-
-          - image: gcr.io/jenkinsxio/builder-go:0.1.320
-            dir: /workspace/tmp
-            command: mkdir
-            args:
-              - -p
-              - /workspace/source/go/src/github.com/jenkins-x
-
-          - image: gcr.io/jenkinsxio/builder-go:0.1.320
-            dir: /workspace/tmp
-            command: mv
-            args:
-              - /workspace/tmp
-              - /workspace/source/go/src/github.com/jenkins-x/sso-operator
- 
-          - name: make-all
-            image: gcr.io/jenkinsxio/builder-go:0.1.332
-            dir: /workspace/source/go/src/github.com/jenkins-x/sso-operator
-            command: make
-            args: 
-            - all
-
           - name: build-and-push-image
             image: gcr.io/kaniko-project/executor:9912ccbf8d22bbafbf971124600fbb0b13b9cbd6
             dir: /workspace/source/go/src/github.com/jenkins-x/sso-operator
             command: /kaniko/executor
             args:
-            - --dockerfile=/workspace/source/go/src/github.com/jenkins-x/sso-operator/Dockerfile
+            - --dockerfile=/workspace/source/Dockerfile
             - --destination=gcr.io/jenkinsxio/sso-operator:${inputs.params.version}
-            - --context=/workspace/source/go/src/github.com/jenkins-x/sso-operator
+            - --context=/workspace/source
             - --cache-dir=/workspace
 
