@@ -96,6 +96,8 @@ pipelineConfig:
             command: make
             args:
             - all
+            - -f
+            - /workspace/source/go/src/github.com/jenkins-x/sso-operator/Makefile
 
           - name: build-and-push-image
             image: gcr.io/kaniko-project/executor:9912ccbf8d22bbafbf971124600fbb0b13b9cbd6
@@ -183,6 +185,8 @@ pipelineConfig:
             command: make
             args: 
             - all
+            - -f
+            - /workspace/source/go/src/github.com/jenkins-x/sso-operator/Makefile
 
           - name: build-and-push-image
             image: gcr.io/kaniko-project/executor:9912ccbf8d22bbafbf971124600fbb0b13b9cbd6
