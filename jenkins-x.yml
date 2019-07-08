@@ -179,11 +179,6 @@ pipelineConfig:
               - /workspace/tmp
               - /workspace/source/go/src/github.com/jenkins-x/sso-operator
 
-          - name: pwd
-            image: gcr.io/jenkinsxio/builder-go:0.1.332
-            dir: /workspace/source/go/src/github.com/jenkins-x/sso-operator
-            command: pwd
-
           - name: list
             image: gcr.io/jenkinsxio/builder-go:0.1.332
             dir: /workspace/source/go/src/github.com/jenkins-x/sso-operator
@@ -193,11 +188,9 @@ pipelineConfig:
  
           - name: make-all
             image: gcr.io/jenkinsxio/builder-go:0.1.332
-            dir: /workspace/source/go/src/github.com/jenkins-x/sso-operator
+            dir: /workspace/source/go/src/github.com/jenkins-x/sso-operator/source
             command: make
-            args: 
-            - -f
-            - /workspace/source/go/src/github.com/jenkins-x/sso-operator/Makefile
+            args:
             - all
 
           - name: build-and-push-image
