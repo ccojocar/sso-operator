@@ -91,12 +91,10 @@ pipelineConfig:
               - /workspace/source/go/src/github.com/jenkins-x/sso-operator
 
           - name: release
-            image: gcr.io/jenkinsxio/builder-go:0.1.332
+            image: gcr.io/jenkinsxio/builder-go:0.1.550
             dir: /workspace/source/go/src/github.com/jenkins-x/sso-operator
             command: make
             args:
-            - -f
-            - /workspace/source/go/src/github.com/jenkins-x/sso-operator/Makefile
             - all
 
           - name: build-and-push-image
@@ -110,7 +108,7 @@ pipelineConfig:
             - --cache-dir=/workspace
 
           - name: release-charts
-            image: gcr.io/jenkinsxio/builder-go:0.1.332
+            image: gcr.io/jenkinsxio/builder-go:0.1.550
             dir: /workspace/source/go/src/github.com/jenkins-x/sso-operator/charts/sso-operator
             command: make
             args:
@@ -178,17 +176,10 @@ pipelineConfig:
             args:
               - /workspace/tmp
               - /workspace/source/go/src/github.com/jenkins-x/sso-operator
-
-          - name: list
-            image: gcr.io/jenkinsxio/builder-go:0.1.332
-            dir: /workspace/source/go/src/github.com/jenkins-x/sso-operator
-            command: ls
-            args:
-              - -laRt
  
           - name: make-all
-            image: gcr.io/jenkinsxio/builder-go:0.1.332
-            dir: /workspace/source/go/src/github.com/jenkins-x/sso-operator/source
+            image: gcr.io/jenkinsxio/builder-go:0.1.550
+            dir: /workspace/source/go/src/github.com/jenkins-x/sso-operator
             command: make
             args:
             - all
