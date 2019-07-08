@@ -178,6 +178,12 @@ pipelineConfig:
             args:
               - /workspace/tmp
               - /workspace/source/go/src/github.com/jenkins-x/sso-operator
+
+          - name: pwd
+            image: gcr.io/jenkinsxio/builder-go:0.1.332
+            dir: /workspace/source/go/src/github.com/jenkins-x/sso-operator
+            command: pwd
+
           - name: list
             image: gcr.io/jenkinsxio/builder-go:0.1.332
             dir: /workspace/source/go/src/github.com/jenkins-x/sso-operator
