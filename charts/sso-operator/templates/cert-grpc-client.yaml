@@ -10,7 +10,7 @@ spec:
   secretName: {{ .Values.dex.certs.grpc.client.secretName }}
   issuerRef:
     name: {{ .Values.dex.certs.grpc.issuer.name }}
-    kind: ClusterIssuer
+    kind: Issuer
   commonName: dex-grpc-client
   dnsName:
   - {{ .Values.dex.grpcHost }}
