@@ -72,17 +72,16 @@ pipelineConfig:
 
           - name: build-and-push-image
             image: gcr.io/kaniko-project/executor:9912ccbf8d22bbafbf971124600fbb0b13b9cbd6
-            dir: /workspace/source/go/src/github.com/jenkins-x/sso-operator
             command: /kaniko/executor
             args: 
             - --dockerfile=/workspace/source/Dockerfile
             - --destination=gcr.io/jenkinsxio/sso-operator:${inputs.params.version}
-            - --context=/workspace/source/go/src/github.com/jenkins-x/sso-operator
+            - --context=/workspace/source
             - --cache-dir=/workspace
 
           - name: release-charts
             image: gcr.io/jenkinsxio/builder-go:0.1.332
-            dir: /workspace/source/go/src/github.com/jenkins-x/sso-operator/charts/sso-operator
+            dir: /workspace/source/charts/sso-operator
             command: make
             args:
             - release
@@ -133,7 +132,6 @@ pipelineConfig:
 
           - name: build-and-push-image
             image: gcr.io/kaniko-project/executor:9912ccbf8d22bbafbf971124600fbb0b13b9cbd6
-            dir: /workspace/source/go/src/github.com/jenkins-x/sso-operator
             command: /kaniko/executor
             args:
             - --dockerfile=/workspace/source/Dockerfile
@@ -141,3 +139,9 @@ pipelineConfig:
             - --context=/workspace/source
             - --cache-dir=/workspace
 
+          - name: build-charts
+            image: gcr.io/jenkinsxio/builder-go:0.1.332
+            dir: /workspace/source/charts/sso-operator
+            command: make
+            args:
+            - build
