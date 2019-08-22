@@ -117,6 +117,8 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		}
 
 		redirectURLs = proxy.ConvertHostsToRedirectURLs(ingressHosts, sso)
+		logrus.Infof("SSO redirect URIs: %v", redirectURLs)
+
 		err = h.dexClient.UpdateClient(ctx, client.Id, redirectURLs, []string{}, publicClient, sso.Name, "")
 		if err != nil {
 			return h.deleteClient(ctx, client.Id, errors.Wrapf(err, "updating the OIDC client '%s' in dex", client.Id))
