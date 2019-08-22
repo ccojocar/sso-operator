@@ -2,8 +2,9 @@ package operator
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/jenkins-x/sso-operator/pkg/apis/jenkins.io/v1"
+	v1 "github.com/jenkins-x/sso-operator/pkg/apis/jenkins.io/v1"
 	"github.com/jenkins-x/sso-operator/pkg/dex"
 	"github.com/jenkins-x/sso-operator/pkg/kubernetes"
 	"github.com/jenkins-x/sso-operator/pkg/proxy"
@@ -92,7 +93,7 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		// Deploy the OIDC proxy
 		proxyResources, err := proxy.Deploy(sso, client, h.operatorConfig.ssoCookieKey)
 		if err != nil {
-			return errors.Wrapf(err, "deploying '%s' SSO proxy", sso.GetName())
+			return h.deleteClient(ctx, client.Id, errors.Wrapf(err, "deploying '%s' SSO proxy", sso.GetName()))
 		}
 
 		// Expose the OIDC proxy service publicly unless sso config is set to skip it
@@ -101,26 +102,31 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		} else {
 			err = proxy.Expose(sso, proxyResources.Service.GetName(), saName)
 			if err != nil {
-				return errors.Wrapf(err, "exposing '%s' SSO proxy", sso.GetName())
+				return h.deleteClient(ctx, client.Id, errors.Wrapf(err, "exposing '%s' SSO proxy", sso.GetName()))
 			}
 		}
 
 		// Update in dex the redirect URL of the OIDC client
 		ingressHosts, err := kubernetes.FindIngressHosts(proxyResources.AppName, sso.GetNamespace())
 		if err != nil {
-			return errors.Wrap(err, "searching ingress hosts")
+			return h.deleteClient(ctx, client.Id, errors.Wrap(err, "searching ingress hosts"))
 		}
+
+		if len(ingressHosts) == 0 {
+			return h.deleteClient(ctx, client.Id, fmt.Errorf("no ingress host found for application %q", proxyResources.AppName))
+		}
+
 		redirectURLs = proxy.ConvertHostsToRedirectURLs(ingressHosts, sso)
 		err = h.dexClient.UpdateClient(ctx, client.Id, redirectURLs, []string{}, publicClient, sso.Name, "")
 		if err != nil {
-			return errors.Wrapf(err, "updating the OIDC client '%s' in dex", client.Id)
+			return h.deleteClient(ctx, client.Id, errors.Wrap(err, "searching ingress hosts"))
 		}
 		client.RedirectUris = redirectURLs
 
 		// Update the OIDC proxy
 		err = proxy.Update(proxyResources, sso, client, h.operatorConfig.ssoCookieKey)
 		if err != nil {
-			return errors.Wrapf(err, "updating '%s' SSO proxy", sso.GetName())
+			return h.deleteClient(ctx, client.Id, errors.Wrapf(err, "updating '%s' SSO proxy", sso.GetName()))
 		}
 
 		// Update the status of SSO CR
@@ -128,10 +134,19 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		sso.Status.Initialized = true
 		err = sdk.Update(sso)
 		if err != nil {
-			return errors.Wrapf(err, "updating '%s' SSO CRD", sso.GetName())
+			return h.deleteClient(ctx, client.Id, errors.Wrapf(err, "updating '%s' SSO CRD", sso.GetName()))
 		}
 
 		logrus.Infof("SSO proxy '%s' initialized", sso.GetName())
 	}
 	return nil
+}
+
+// deleteClient ensure that the OIDC client is removed from dex
+func (h *Handler) deleteClient(ctx context.Context, id string, cause error) error {
+	err := h.dexClient.DeleteClient(ctx, id)
+	if err != nil {
+		return errors.Wrapf(err, "%s. Deleteing the OIDC client", cause.Error())
+	}
+	return cause
 }
