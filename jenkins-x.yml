@@ -76,6 +76,7 @@ pipelineConfig:
             args: 
             - --dockerfile=/workspace/source/Dockerfile
             - --destination=gcr.io/jenkinsxio/sso-operator:${inputs.params.version}
+            - --destination=gcr.io/jenkinsxio/sso-operator:latest
             - --context=/workspace/source
             - --cache-dir=/workspace
 
