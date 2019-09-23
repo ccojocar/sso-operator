@@ -46,6 +46,8 @@ type SSOSpec struct {
 	URLTemplate string `json:"urlTemplate,omitempty"`
 	// SkipExposeService to avoid using exposecontroller to create ingress rule for proxy
 	SkipExposeService bool `json:"skipExposeService,omitempty"`
+	// SSLInsecureSkipVerify allows the proxy container to connect with a OIDC using selft-sogned certs, this should be used for testing only
+	SSLInsecureSkipVerify bool `json:"sslInsecureSkipVerify,omitempty"`
 }
 
 // CookieSpec is the specification of a cookie for a Single Sign-On resource
