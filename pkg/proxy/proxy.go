@@ -319,11 +319,16 @@ func ownerRef(sso *apiv1.SSO) metav1.OwnerReference {
 }
 
 func proxyContainer(sso *apiv1.SSO, secretVersion string) v1.Container {
+	args := []string{fmt.Sprintf("--config=%s", configPath)}
+	// should only be used in testing scenarios
+	if sso.Spec.SSLInsecureSkipVerify {
+		args = append(args, "--ssl-insecure-skip-verify=true")
+	}
 	return v1.Container{
 		Name:            buildName(sso.GetName(), ""),
 		Image:           fmt.Sprintf("%s:%s", sso.Spec.ProxyImage, sso.Spec.ProxyImageTag),
 		ImagePullPolicy: v1.PullIfNotPresent,
-		Args:            []string{fmt.Sprintf("--config=%s", configPath)},
+		Args:            args,
 		Ports: []v1.ContainerPort{{
 			Name:          portName,
 			ContainerPort: int32(port),
