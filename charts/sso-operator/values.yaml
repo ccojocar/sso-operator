@@ -33,6 +33,9 @@ terminationGracePeriodSeconds: 10
 watch:
   namespace: "" # if the namespace is empty, it will watch the entire cluster
 
+certs:
+  legacyApi: false
+
 dex:
   grpcHost: dex.sso
   grpcPort: 5000 
