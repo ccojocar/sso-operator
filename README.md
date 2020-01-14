@@ -104,7 +104,7 @@ spec:
     secure: true
     httpOnly: true
   proxyImage: "quay.io/pusher/oauth2_proxy"
-  proxyImageTag: "3.1.0"
+  proxyImageTag: "v3.2.0"
   proxyResources:
     limits:
       cpu: 100m
