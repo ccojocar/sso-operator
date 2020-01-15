@@ -80,7 +80,7 @@ pipelineConfig:
             - --version
             - ${inputs.params.version}
             - --repo 
-            - https://github.com/jenkins-x/jenkins-x-platform.git
+            - https://github.com/jenkins-x/jenkins-x-versions.git
             dir: /workspace/source
 
     pullRequest:
