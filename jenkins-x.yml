@@ -68,6 +68,7 @@ pipelineConfig:
             - release
             dir: /workspace/source/charts/sso-operator
           - name: update-chart-version
+            image: gcr.io/jenkinsxio/builder-go
             command: jx
             args:
             - step
