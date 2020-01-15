@@ -67,7 +67,7 @@ pipelineConfig:
             args:
             - release
             dir: /workspace/source/charts/sso-operator
-          - name: update-chart-version
+          - name: update-chart-version-jx-versions
             image: gcr.io/jenkinsxio/builder-go
             command: jx
             args:
@@ -81,6 +81,21 @@ pipelineConfig:
             - ${inputs.params.version}
             - --repo 
             - https://github.com/jenkins-x/jenkins-x-versions.git
+            dir: /workspace/source
+          - name: update-chart-version-sso-app
+            image: gcr.io/jenkinsxio/builder-go
+            command: jx
+            args:
+            - step
+            - create
+            - pr
+            - chart
+            - --name 
+            - sso-operator
+            - --version
+            - ${inputs.params.version}
+            - --repo 
+            - https://github.com/jenkins-x-apps/jx-app-sso.git
             dir: /workspace/source
 
     pullRequest:
