@@ -2,8 +2,6 @@ CHART_REPO := http://jenkins-x-chartmuseum:8080
 CURRENT=$(pwd)
 NAME := sso-operator
 OS := $(shell uname)
-CHARTMUSEUM_CREDS_USR := $(shell cat /builder/home/basic-auth-user 2> /dev/null)
-CHARTMUSEUM_CREDS_PSW := $(shell cat /builder/home/basic-auth-pass 2> /dev/null)
 
 init: 
 	helm init --client-only
@@ -13,7 +11,7 @@ setup: init
 
 build: clean setup
 	helm dependency build
-	helm lint
+	helm lint .
 
 install: clean setup build
 	helm install . --name ${NAME}
@@ -41,6 +39,6 @@ else
 	exit -1
 endif
 	helm package .
-	curl --fail -u $(CHARTMUSEUM_CREDS_USR):$(CHARTMUSEUM_CREDS_PSW) --data-binary "@$(NAME)-$(VERSION).tgz" $(CHART_REPO)/api/charts
+	curl --fail -u $(CHARTMUSEUM_USER):$(CHARTMUSEUM_PASS) --data-binary "@$(NAME)-$(VERSION).tgz" $(CHART_REPO)/api/charts
 	helm repo update
 	rm -rf ${NAME}*.tgz
