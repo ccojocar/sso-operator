@@ -45,7 +45,7 @@ const (
 	ingressNameAnnotation    = "fabric8.io/ingress.name"
 	ingressClassAnnotations  = "kubernetes.io/ingress.class"
 	oldCertManagerAnnotation = "certmanager.k8s.io/issuer"
-	certManagerAnnotation    = "certmanager.io/issuer"
+	certManagerAnnotation    = "cert-manager.io/issuer"
 	ingressClass             = "nginx"
 )
 
