@@ -15,7 +15,7 @@ import (
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8slabels "k8s.io/apimachinery/pkg/labels"
@@ -40,12 +40,13 @@ const (
 	appLabel            = "app"
 	releaseLabel        = "release"
 
-	exposeAnnotation        = "fabric8.io/expose"
-	exposeIngressAnnotation = "fabric8.io/ingress.annotations"
-	ingressNameAnnotation   = "fabric8.io/ingress.name"
-	ingressClassAnnotations = "kubernetes.io/ingress.class"
-	certManagerAnnotation   = "certmanager.k8s.io/issuer"
-	ingressClass            = "nginx"
+	exposeAnnotation         = "fabric8.io/expose"
+	exposeIngressAnnotation  = "fabric8.io/ingress.annotations"
+	ingressNameAnnotation    = "fabric8.io/ingress.name"
+	ingressClassAnnotations  = "kubernetes.io/ingress.class"
+	oldCertManagerAnnotation = "certmanager.k8s.io/issuer"
+	certManagerAnnotation    = "certmanager.io/issuer"
+	ingressClass             = "nginx"
 )
 
 // Proxy keeps the k8s resources created for a proxy
@@ -111,6 +112,7 @@ func labels(sso *apiv1.SSO, appName string) map[string]string {
 func serviceAnnotations(sso *apiv1.SSO, appName string) map[string]string {
 	expIngressAnnotation := ingressClassAnnotations + ": " + ingressClass
 	if len(sso.Spec.CertIssuerName) != 0 {
+		expIngressAnnotation += "\n" + oldCertManagerAnnotation + ": " + sso.Spec.CertIssuerName
 		expIngressAnnotation += "\n" + certManagerAnnotation + ": " + sso.Spec.CertIssuerName
 	}
 	return map[string]string{
