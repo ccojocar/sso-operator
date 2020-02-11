@@ -4,7 +4,7 @@
 replicaCount: 1
 image:
   repo: gcr.io/jenkinsxio/sso-operator
-  tag: 1.2.19
+  tag: 1.2.41
   pullPolicy: Always
 service:
   name: sso-operator
