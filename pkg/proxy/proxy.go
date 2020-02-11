@@ -152,7 +152,7 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client, cookieSecret string) (*Proxy
 				Name: configVolumeName,
 				VolumeSource: v1.VolumeSource{
 					Secret: &v1.SecretVolumeSource{
-						SecretName: configSecretName,
+						SecretName: buildName(sso.GetName(), configSecretName),
 					},
 				},
 			}},
@@ -442,7 +442,7 @@ func proxySecret(sso *apiv1.SSO, client *api.Client, cookieSecret string, labels
 			Kind:       "Secret",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      configSecretName,
+			Name:      buildName(sso.GetName(), configSecretName),
 			Namespace: sso.Namespace,
 			Labels:    labels,
 		},
