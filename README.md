@@ -56,6 +56,7 @@ First, you will need to add the jenkins-x chart repository to your helm reposito
 helm repo add jenkins-x http://chartmuseum.jenkins-x.io
 helm repo update
 ```
+
 You can now install the chart with:
 ```
 helm install --namespace <NAMESPACE> --set dex.grpcHost=dex.<DEX_NAMESPACE> --name sso-operator jenkins-x/sso-operator 
