@@ -1,7 +1,7 @@
 package kubernetes
 
 import (
-	"github.com/jenkins-x/sso-operator/pkg/apis/jenkins.io/v1"
+	v1 "github.com/jenkins-x/sso-operator/pkg/apis/jenkins.io/v1"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

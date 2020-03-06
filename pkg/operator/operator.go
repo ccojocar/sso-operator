@@ -148,7 +148,7 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 func (h *Handler) deleteClient(ctx context.Context, id string, cause error) error {
 	err := h.dexClient.DeleteClient(ctx, id)
 	if err != nil {
-		return errors.Wrapf(err, "%s. Deleteing the OIDC client", cause.Error())
+		return errors.Wrapf(err, "%s. Deleting the OIDC client", cause.Error())
 	}
 	return cause
 }

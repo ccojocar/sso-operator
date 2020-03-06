@@ -1,0 +1,22 @@
+buildPack: none
+pipelineConfig:
+  pipelines:
+    pullRequest:
+      pipeline:
+        agent:
+          image: gcr.io/jenkinsxio/builder-go
+        stages:
+          - name: lint
+            options: 
+              containerOptions:
+                resources:
+                  limits:
+                    cpu: 2
+                    memory: 2Gi
+                  requests:
+                    cpu: 1
+                    memory: 1Gi
+            steps:
+              - name: run-linter
+                command: /workspace/source/hack/linter.sh
+                dir: /workspace/source

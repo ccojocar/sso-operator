@@ -1,0 +1,63 @@
+module github.com/jenkins-x/sso-operator
+
+go 1.12
+
+require (
+	github.com/PuerkitoBio/purell v1.1.0
+	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578
+	github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973
+	github.com/coreos/dex v0.0.0-20180731083800-123229e8fe81
+	github.com/davecgh/go-spew v1.1.0
+	github.com/emicklei/go-restful v2.8.0+incompatible
+	github.com/ghodss/yaml v1.0.0
+	github.com/go-openapi/jsonpointer v0.0.0-20180322222829-3a0015ad55fa
+	github.com/go-openapi/jsonreference v0.0.0-20180322222742-3fb327e6747d
+	github.com/go-openapi/spec v0.0.0-20180710175419-bce47c9386f9
+	github.com/go-openapi/swag v0.0.0-20180703152219-2b0bd4f193d0
+	github.com/gogo/protobuf v1.1.1
+	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
+	github.com/golang/protobuf v1.1.0
+	github.com/google/btree v0.0.0-20180124185431-e89373fe6b4a
+	github.com/google/gofuzz v0.0.0-20170612174753-24818f796faf
+	github.com/googleapis/gnostic v0.2.0
+	github.com/gregjones/httpcache v0.0.0-20180305231024-9cad4c3443a7
+	github.com/hashicorp/golang-lru v0.0.0-20180201235237-0fb14efe8c47
+	github.com/howeyc/gopass v0.0.0-20170109162249-bf9dde6d0d2c
+	github.com/imdario/mergo v0.3.6
+	github.com/inconshreveable/mousetrap v1.0.0
+	github.com/json-iterator/go v0.0.0-20180701071628-ab8a2e0c74be
+	github.com/juju/ratelimit v1.0.1
+	github.com/mailru/easyjson v0.0.0-20180730094502-03f2033d19d5
+	github.com/matttproud/golang_protobuf_extensions v1.0.1
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
+	github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742
+	github.com/operator-framework/operator-sdk v0.0.0-20180730221907-1c3780f1afb2
+	github.com/petar/GoLLRB v0.0.0-20130427215148-53be0d36a84c
+	github.com/peterbourgon/diskv v2.0.1+incompatible
+	github.com/pkg/errors v0.8.0
+	github.com/pmezard/go-difflib v1.0.0
+	github.com/prometheus/client_golang v0.8.0
+	github.com/prometheus/client_model v0.0.0-20180712105110-5c3871d89910
+	github.com/prometheus/common v0.0.0-20180518154759-7600349dcfe1
+	github.com/prometheus/procfs v0.0.0-20180725123919-05ee40e3a273
+	github.com/sirupsen/logrus v1.0.6
+	github.com/spf13/cobra v0.0.3
+	github.com/spf13/pflag v1.0.1
+	github.com/stretchr/testify v1.2.2
+	golang.org/x/crypto v0.0.0-20180723164146-c126467f60eb
+	golang.org/x/net v0.0.0-20180730214132-a0f8a16cb08c
+	golang.org/x/sys v0.0.0-20180727230415-bd9dbc187b6e
+	golang.org/x/text v0.3.0
+	golang.org/x/tools v0.0.0-20180730211359-0700b576e4d8
+	google.golang.org/genproto v0.0.0-20180726180014-2a72893556e4
+	google.golang.org/grpc v1.13.0
+	gopkg.in/inf.v0 v0.9.1
+	gopkg.in/yaml.v2 v2.2.1
+	k8s.io/api v0.0.0-20180711052118-183f3326a935
+	k8s.io/apiextensions-apiserver v0.0.0-20180621085152-bbc52469f98b
+	k8s.io/apimachinery v0.0.0-20180126010752-19e3f5aa3adc
+	k8s.io/client-go v0.0.0-20180103015815-9389c055a838
+	k8s.io/code-generator v0.0.0-20180621065459-6702109cc68e
+	k8s.io/gengo v0.0.0-20180718083919-906d99f89cd6
+	k8s.io/kube-openapi v0.0.0-20180719232738-d8ea2fe547a4
+)

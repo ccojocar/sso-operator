@@ -34,9 +34,9 @@ const (
 	publicPort          = 80
 	cookieSecretLen     = 32
 	fakeURL             = "https://fake-oauth2-proxy"
-	createTimeout       = time.Duration(60 * time.Second)
-	createIntervalCheck = time.Duration(10 * time.Second)
-	readyTimeout        = time.Duration(5 * time.Minute)
+	createTimeout       = 60 * time.Second
+	createIntervalCheck = 10 * time.Second
+	readyTimeout        = 5 * time.Minute
 	appLabel            = "app"
 	releaseLabel        = "release"
 
