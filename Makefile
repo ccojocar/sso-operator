@@ -13,7 +13,6 @@ PKGS := $(shell go list ./... | grep -v /vendor | grep -v generated)
 PKGS := $(subst  :,_,$(PKGS))
 BUILDFLAGS := ''
 CGO_ENABLED = 0
-VENDOR_DIR=vendor
 GO_DEPENDENCIES := $(shell find . -type f -name '*.go')
 
 all: fmt lint sec test build
@@ -33,7 +32,7 @@ fmt:
 	@([[ ! -z "$(FORMATTED)" ]] && printf "Fixed unformatted files:\n$(FORMATTED)") || true
 
 clean:
-	rm -rf build release $(VENDOR_DIR)
+	rm -rf build release
 
 GOLINT := $(GOPATH)/bin/golint
 $(GOLINT):
