@@ -1,5 +1,8 @@
 SHELL := /bin/bash
-GO := GO15VENDOREXPERIMENT=1 go
+
+GO := GO111MODULE=on GO15VENDOREXPERIMENT=1 go
+GO_NOMOD := GO111MODULE=off go
+
 NAME := sso-operator
 OS := $(shell uname)
 MAIN_GO := main.go
@@ -11,18 +14,11 @@ PKGS := $(subst  :,_,$(PKGS))
 BUILDFLAGS := ''
 CGO_ENABLED = 0
 VENDOR_DIR=vendor
+GO_DEPENDENCIES := $(shell find . -type f -name '*.go')
 
-all: bootstrap fmt lint sec test build
+all: fmt lint sec test build
 
-DEP := $(GOPATH)/bin/dep
-$(DEP):
-	go get -u github.com/golang/dep/cmd/dep
-
-bootstrap: $(DEP)
-	@echo "INSTALLING DEPENDENCIES"
-	$(DEP) ensure 
-
-build:
+build: $(GO_DEPENDENCIES)
 	CGO_ENABLED=$(CGO_ENABLED) $(GO) build -ldflags $(BUILDFLAGS) -o bin/$(NAME) $(MAIN_GO)
 
 test: 
