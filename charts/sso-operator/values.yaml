@@ -43,5 +43,6 @@ dex:
     grpc:
       issuer:
         name: dex-grpc-cert-issuer
+        kind: Issuer
       client:
         secretName: dex-grpc-client-cert
