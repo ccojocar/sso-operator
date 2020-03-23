@@ -14,7 +14,7 @@ spec:
   secretName: {{ .Values.dex.certs.grpc.client.secretName }}
   issuerRef:
     name: {{ .Values.dex.certs.grpc.issuer.name }}
-    kind: Issuer
+    kind: {{ .Values.dex.certs.grpc.issuer.kind }}
   commonName: dex-grpc-client
   dnsName:
   - {{ .Values.dex.grpcHost }}
