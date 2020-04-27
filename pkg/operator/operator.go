@@ -17,6 +17,7 @@ import (
 func NewHandler(dexClient *dex.Client, namespace string, clusterRoleName string) (sdk.Handler, error) {
 	config, err := getOperatorConfigFromSecret(namespace)
 	if err != nil {
+		logrus.Info("unable to fetch existing cookie key: " + err.Error())
 		logrus.Info("operator generating the cookie key")
 		ssoCookieKey, err := proxy.GenerateCookieKey()
 		if err != nil {
@@ -29,6 +30,8 @@ func NewHandler(dexClient *dex.Client, namespace string, clusterRoleName string)
 		if err != nil {
 			return nil, errors.Wrap(err, "storing the operator config in a secret")
 		}
+	} else {
+		logrus.Info("operator using existing cookie key")
 	}
 	return &Handler{
 		dexClient:       dexClient,

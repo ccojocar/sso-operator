@@ -3,7 +3,7 @@ package operator
 import (
 	"github.com/jenkins-x/sso-operator/pkg/kubernetes"
 	"github.com/pkg/errors"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -35,7 +35,7 @@ func getOperatorConfigFromSecret(namespace string) (*operatorConfig, error) {
 		return nil, errors.Wrap(err, "cleaning up the operator config secret due to error")
 	}
 
-	cookieKey, ok := secret.StringData[ssoCookieKey]
+	cookieKey, ok := secret.Data[ssoCookieKey]
 	if !ok {
 		delerr := deleteOperatorConfigSecret(namespace)
 		if delerr != nil {
@@ -45,7 +45,7 @@ func getOperatorConfigFromSecret(namespace string) (*operatorConfig, error) {
 	}
 
 	return &operatorConfig{
-		ssoCookieKey: cookieKey,
+		ssoCookieKey: string(cookieKey),
 	}, nil
 }
 
