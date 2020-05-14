@@ -32,7 +32,7 @@ clean:
 
 lint:
 	@echo "LINTING"
-	$(GO_NOMOD) get -u golang.org/x/lint/golint
+	$(GO_NOMOD) get golang.org/x/lint/golint
 	$(GOLINT) -set_exit_status ./...
 	@echo "VETTING"
 	$(GO) vet ./...
