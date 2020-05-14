@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/coreos/dex/api"
+	"github.com/dexidp/dex/api"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -95,7 +95,6 @@ func (c *Client) UpdateClient(ctx context.Context, clientID string, redirectUris
 		Id:           clientID,
 		RedirectUris: redirectUris,
 		TrustedPeers: trustedPeers,
-		Public:       public,
 		Name:         name,
 		LogoUrl:      logoURL,
 	}

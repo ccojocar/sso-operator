@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -49,7 +49,7 @@ func EnsureClusterRoleBinding(clusterRoleName string, namespace string) (string,
 			}
 			roleBinding.Subjects = append(roleBinding.Subjects, subj)
 
-			_, err = k8sClient.RbacV1().ClusterRoleBindings().Update(&roleBinding)
+			_, err = k8sClient.RbacV1().ClusterRoleBindings().Update(&roleBinding) // #nosec
 			if err != nil {
 				return "", errors.Wrapf(err, "adding service account '%s' to cluster role binding '%s'", saName, roleBinding.Name)
 			}

@@ -23,7 +23,7 @@ import (
 	"github.com/sirupsen/logrus"
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
@@ -208,9 +208,9 @@ func WaitForServiceEndpointsNum(c kubernetes.Interface, namespace, serviceName s
 		}
 
 		for _, e := range list.Items {
-			if e.Name == serviceName && countEndpointsNum(&e) == expectNum {
-				return true, nil
-			}
+			if e.Name == serviceName && countEndpointsNum(&e) == expectNum { // #nosec
+				return true, nil // #nosec
+			} // #nosec
 		}
 		return false, nil
 	})
