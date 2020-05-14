@@ -137,6 +137,12 @@ pipelineConfig:
                   mountPath: /secrets
 
           steps:
+          - name: tests
+            image: gcr.io/jenkinsxio/builder-go
+            command: make
+            args:
+            - all
+            dir: /workspace/source
           - name: build-and-push-image
             image: gcr.io/kaniko-project/executor:9912ccbf8d22bbafbf971124600fbb0b13b9cbd6
             command: /kaniko/executor

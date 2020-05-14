@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coreos/dex/api"
+	"github.com/dexidp/dex/api"
 	apiv1 "github.com/jenkins-x/sso-operator/pkg/apis/jenkins.io/v1"
 	"github.com/jenkins-x/sso-operator/pkg/kubernetes"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
@@ -270,13 +270,13 @@ func Update(proxy *Proxy, sso *apiv1.SSO, client *api.Client, cookieSecret strin
 		if deployment.GetName() == deploymentName {
 			containers := deployment.Spec.Template.Spec.Containers
 			for _, container := range containers {
-				updateContainer(&container, secretVersion)
+				updateContainer(&container, secretVersion) // #nosec
 			}
 			deployment.TypeMeta = metav1.TypeMeta{
 				Kind:       "Deployment",
 				APIVersion: "apps/v1",
 			}
-			err = sdk.Update(&deployment)
+			err = sdk.Update(&deployment) // #nosec
 			if err != nil {
 				return errors.Wrap(err, "updating oauth2_proxy deployment")
 			}
