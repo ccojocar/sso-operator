@@ -21,8 +21,6 @@ pipelineConfig:
             value: /builder/home/.helm
           - name: GOOGLE_APPLICATION_CREDENTIALS
             value: /secrets/kaniko/kaniko-secret.json
-          - name: GOPATH
-            value: /workspace/source/go
           - name: GOPROXY
             value: http://jx-app-athens-athens-proxy
           - name: APP_NAME
@@ -119,8 +117,6 @@ pipelineConfig:
             value: http://jenkins-x-athens-proxy:80
           - name: GOOGLE_APPLICATION_CREDENTIALS
             value: /secrets/kaniko/kaniko-secret.json
-          - name: GOPATH
-            value: /workspace/source/go
           - name: APP_NAME
             value: sso-operator
           options:
