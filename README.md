@@ -1,6 +1,6 @@
 # sso-operator
 
-Single Sign-On Kubernetes [operator](https://coreos.com/operators/) for [dex](https://github.com/coreos/dex), which can provision, expose and manage a [SSO proxy](https://github.com/bitly/oauth2_proxy) for a Kubernetes service. 
+Single Sign-On Kubernetes [operator](https://coreos.com/operators/) for [dex](https://github.com/coreos/dex), which can provision, expose and manage a [SSO proxy](https://github.com/oauth2-proxy/oauth2-proxy) for a Kubernetes service. 
 
 ## Architecture
 
