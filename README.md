@@ -144,3 +144,17 @@ spec:
 
   ...
 ```
+
+If you want to pull the proxyImage from a private registry you can set the `proxyImagePullSecret` config.
+```yaml
+cat <<EOF | kubectl create -f -
+apiVersion: "jenkins.io/v1"
+kind: "SSO"
+metadata:
+  name: "sso-golang-http"
+  namespace: jx-staging
+spec:
+  proxyImagePullSecret: "private-registry-secret"
+
+  ...
+```
