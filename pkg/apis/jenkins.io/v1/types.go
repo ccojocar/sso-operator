@@ -36,6 +36,8 @@ type SSOSpec struct {
 	ProxyImage string `json:"proxyImage,omitempty"`
 	// Docker image tag for oauth2_proxy
 	ProxyImageTag string `json:"proxyImageTag,omitempty"`
+	// Docker image PullSecret for oauth2_proxy
+	ProxyImagePullSecret string `json:"proxyImagePullSecret,omitempty"`
 	// Resource requirements for oauth2_proxy pod
 	ProxyResources v1.ResourceRequirements `json:"proxyResources,omitempty"`
 	// Indicate if the access token should be forwarded to the upstream service

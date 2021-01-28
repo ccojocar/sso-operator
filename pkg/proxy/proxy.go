@@ -156,6 +156,9 @@ func Deploy(sso *apiv1.SSO, oidcClient *api.Client, cookieSecret string) (*Proxy
 					},
 				},
 			}},
+			ImagePullSecrets: []v1.LocalObjectReference{
+				{sso.Spec.ProxyImagePullSecret},
+			},
 		},
 	}
 
