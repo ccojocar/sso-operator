@@ -51,6 +51,7 @@ func NewClient(opts *Options) (*Client, error) {
 	clientTLSConfig := &tls.Config{
 		RootCAs:      certPool,
 		Certificates: []tls.Certificate{clientCert},
+		MinVersion:   tls.VersionTLS12,
 	}
 	creds := credentials.NewTLS(clientTLSConfig)
 

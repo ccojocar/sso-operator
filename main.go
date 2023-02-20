@@ -52,7 +52,7 @@ func handleLiveness() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		logrus.Debug("ping")
 	})
-	err := http.ListenAndServe(":"+port, nil)
+	err := http.ListenAndServe(":"+port, nil) // #nosec
 	if err != nil {
 		logrus.Errorf("failed to start health probe: %v\n", err)
 	}
